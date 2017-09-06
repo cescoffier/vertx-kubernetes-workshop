@@ -49,10 +49,10 @@ What you are going to learn:
 
 And many more...
 
-This lab is a _à la carte_ lab. Once you have done the basic installation and introduction, you can pick one of the
-topic you are interested in. For instance, after the introduction, if you are interested by gRPC, you can jump to the
- gRPC section, and try it out. We highly recommend to start by the beginning that explain the concepts behind Vert.x,
-  reactive systems, reactive programming and microservices.
+This lab is an _à la carte_ lab. Once you have done the basic installation and introduction, you can pick one of the
+topics you are interested in. For instance, after the introduction, if you are interested in gRPC, you can jump to the
+ gRPC section and try it out. We highly recommend to start at the beginning to understand the concepts behind Vert.x,
+  reactive systems, reactive programming, and microservices.
 
  Don't expect to complete this lab in 3 hours, it will take you a lot more. But that's not a big deal. Pick the topic
   you want, learn what you want, and come back later to learn more.
