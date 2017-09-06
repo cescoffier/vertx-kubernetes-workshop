@@ -61,3 +61,20 @@ different implementations of _service oriented computing_.
 
 Finally, there is a common misconception that microservices must be RESTful by nature. This can't be farther from the truth. Microservices can employ any number interaction style that best fit their purpose: RPC, events, messages, streams etc. In this lab we will using RESTful services, async RPC, and message sources.
 
+It tends to not be easy to use service discovery when we are not used to. So, let's do a few exercies about it:
+
+### Exercise - Publishing a service
+
+// Write a small app creating a HTTP service and publishing it
+// The app has 1 verticle
+
+
+### Exercise - Consuming a service using service references
+
+// Reuse the same app but deploy another verticle to retrieve and consume the service
+
+### Exercise - Consuming a service using sugars
+
+// Rewrite the second verticle to retrieve directly the Web Client
+
+

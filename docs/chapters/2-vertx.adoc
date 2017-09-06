@@ -3,7 +3,7 @@
 We will attempt to explain Vert.x in just a few lines. Remember that we said in the previous section that Vert.x is _"a toolkit for building
 reactive applications on the JVM"_.
 
-There are a three important points in this description: **toolkit**, **reactive** and _"on the JVM"_.
+There are a three important points in this description: **toolkit**, **reactive** and **on the JVM**.
 
 Firstly, Vert.x is a **toolkit**. Meaning, Vert.x is not an application server, a container nor a framework.
 It's not a JavaScript library either. Vert.x is a plain old `jar` file, so a Vert.x application is an application that uses this `jar`
@@ -33,7 +33,7 @@ Also, Vert.x is event-driven and also non-blocking. Events are delivered in an
 _event loop_ that **must never be blocked**. Let's explain why. Unlike traditional, let's say "enterprise", systems,
 Vert.x uses a very small number of threads. Some of these threads are _event loops_, they are responsible for
 dispatching the events in `Handlers`. If you block this thread, the events won't be delivered anymore. This
-execution model impacts how you write your code, instead of the _traditional_ mofrl of blocking code, your code is
+execution model impacts how you write your code, instead of the _traditional_ model of blocking code, your code is
 going to be asynchronous footnote:[Asynchronous: the caller does not wait for a returned response, but pass
  a _callback_ which is executed when the result has been computed] and non-blocking footnote:[Non-blocking: the code
   must not block the executing thread - so it must avoid blocking IO, long processing time etc.].
@@ -90,4 +90,34 @@ incredibly flexible - whether it's simple network utilities, sophisticated moder
 microservices, high volume event processing or a full blown backend message-bus application, Vert.x is a great fit.
 It's fast, and does not constraint you. Last but not least, Vert.x provides appropriate tools to build reactive systems; systems that are: _responsive, elastic, resilient and asynchronous_!
 
+It's time to make your hands dirty. We are going to start by a few examples about Vert.x. These examples are not
+related to the application we are going to develop later in this lab, but are just there to let you start playing
+with Vert.x.
+
+### Exercise - Vert.x applications are Java application
+
+// An example using a simple main method and starting a HTTP server
+
+### Exercise - Using verticles
+
+// Same as before but extract the HTTP server into its own verticle
+// Display the thread name
+
+### Exercise - Do not block the event loop
+
+// Bad code blocking the event loop
+
+### Exercise - Sending and receiving messages
+
+// Use another verticle to be notified when a request is received
+
+### Exercise - Request Reply and Composing actions
+
+// Another verticle used by the HTTP one to compute a result
+// Use request reply
+// Highlight the async composition
+
+### Exercise - Use RX Java 2
+
+// Same as before with RX Java 2 to ease the composition
 

@@ -1,18 +1,18 @@
-# Vert.x - From zero to (micro)-hero
-Clement Escoffier, Julien Viet
-v0.6, March, 18th, 2017
+# Vert.x & Kubernetes - From zero to (micro)-hero
+Clement Escoffier
+v0.1, September, 6th, 2017
 :toc: left
 :toclevels: 4
 :imagesdir: images
 :docinfo1:
 :icons: font
 
-include::chapters/preface.adoc[Preface]
-include::chapters/vertx.adoc[Vert.x]
-include::chapters/microservices.adoc[Demystifying microservices]
-include::chapters/application.adoc[The application]
-include::chapters/prerequisites.adoc[Prerequisites]
-include::chapters/setup.adoc[Let's start !]
+include::chapters/1-preface.adoc[Preface]
+include::chapters/11-prerequisites.adoc[Prerequisites]
+include::chapters/2-vertx.adoc[Vert.x]
+include::chapters/3-microservices.adoc[Demystifying microservices]
+include::chapters/4-application.adoc[The application]
+include::chapters/5-kubernetes.adoc[First step with Kubernetes]
 include::chapters/quote-generator.adoc[Your first Vert.x microservice - the quote generator]
 include::chapters/portfolio.adoc[Exposing Event bus services, and HTTP client  - the portfolio service]
 include::chapters/traders.adoc[Consuming Event bus services and polyglot verticle - the trader service]

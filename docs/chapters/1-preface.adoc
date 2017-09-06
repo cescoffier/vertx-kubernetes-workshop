@@ -1,4 +1,4 @@
-## Preface
+## Preface - what happens when you mix reactive, containers and Cloud altogether...
 
 Let's start from the beginning.... _Vert.x_. What's Vert.x? That's a pretty good question, and probably a good start.
  If you go on the http://vertx.io[Vert.x web site], Vert.x is defined as _"a toolkit for building reactive
@@ -51,7 +51,8 @@ And many more...
 
 This lab is a _à la carte_ lab. Once you have done the basic installation and introduction, you can pick one of the
 topic you are interested in. For instance, after the introduction, if you are interested by gRPC, you can jump to the
- gRPC section, and try it out.
+ gRPC section, and try it out. We highly recommend to start by the beginning that explain the concepts behind Vert.x,
+  reactive systems, reactive programming and microservices.
 
  Don't expect to complete this lab in 3 hours, it will take you a lot more. But that's not a big deal. Pick the topic
   you want, learn what you want, and come back later to learn more.

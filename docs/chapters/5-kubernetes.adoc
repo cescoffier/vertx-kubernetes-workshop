@@ -1,0 +1,14 @@
+## First step with Kubernetes
+
+// Kubernetes and Openshift
+
+// Overview of the concepts
+
+// Create the project
+
+// Apply permissions
+
+// Deploy the 3rd party currency service
+
+// Navigate to the different concepts
+// Build, Deployment, Pod, Service, Route
