@@ -5,22 +5,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.vertx.workshop</groupId>
-  <artifactId>vertx-microservice-workshop</artifactId>
+  <artifactId>vertx-kubernetes-workshop</artifactId>
   <version>1.0-SNAPSHOT</version>
-
-  <parent>
-    <groupId>io.vertx</groupId>
-    <artifactId>vertx-parent</artifactId>
-    <version>10</version>
-  </parent>
 
   <packaging>pom</packaging>
 
   <properties>
-    <stack.version>3.4.1</stack.version>
-
-    <!--overridden in each project packaged as a fat jar -->
-    <main.verticle/>
+    <vertx.version>3.5.0.beta1</vertx.version>
   </properties>
 
   <modules>
@@ -37,7 +28,7 @@
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-dependencies</artifactId>
-        <version>${stack.version}</version>
+        <version>${vertx.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -49,27 +40,24 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/io.vertx/vertx-lang-scala_2.12 -->
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-service-proxy</artifactId>
-      <classifier>processor</classifier>
+      <artifactId>vertx-lang-scala_2.12</artifactId>
+      <version>${vertx.version}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-lang-groovy</artifactId>
+      <artifactId>vertx-lang-kotlin</artifactId>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-lang-js</artifactId>
+      <artifactId>vertx-rx-java2</artifactId>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-codegen</artifactId>
       <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-sockjs-service-proxy</artifactId>
     </dependency>
 
     <dependency>
@@ -82,7 +70,7 @@
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-hazelcast</artifactId>
+      <artifactId>vertx-infinispan</artifactId>
     </dependency>
 
     <!-- Microservice toolbox -->
@@ -110,21 +98,22 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.5.2</version>
+      <version>3.8.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.jayway.awaitility</groupId>
+      <groupId>org.awaitility</groupId>
       <artifactId>awaitility</artifactId>
-      <version>1.7.0</version>
+      <version>3.0.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.jayway.restassured</groupId>
+      <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
-      <version>2.9.0</version>
+      <version>3.0.3</version>
       <scope>test</scope>
     </dependency>
+
 
   </dependencies>
 
@@ -144,18 +133,76 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
+          <version>3.7.0</version>
           <configuration>
             <source>1.8</source>
             <target>1.8</target>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>io.fabric8</groupId>
+          <artifactId>vertx-maven-plugin</artifactId>
+          <version>1.0.9</version>
+          <executions>
+            <execution>
+              <id>vmp</id>
+              <goals>
+                <goal>initialize</goal>
+                <goal>package</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <redeploy>true</redeploy>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>io.fabric8</groupId>
+          <artifactId>fabric8-maven-plugin</artifactId>
+          <version>3.5.25</version>
+          <executions>
+            <execution>
+              <id>fmp</id>
+              <goals>
+                <goal>resource</goal>
+                <goal>build</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.20</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
 
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.10</version>
+          <version>3.0.1</version>
           <executions>
+            <!-- TODO how to provision the infinispan config -->
             <execution>
               <id>unpack-hazelcast-configuration</id>
               <phase>process-resources</phase>
@@ -166,36 +213,6 @@
                 <includeArtifactIds>vertx-workshop-common</includeArtifactIds>
                 <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 <includes>**/cluster.xml</includes>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-shade-plugin</artifactId>
-          <version>2.4.3</version>
-          <executions>
-            <execution>
-              <phase>package</phase>
-              <goals>
-                <goal>shade</goal>
-              </goals>
-              <configuration>
-                <transformers>
-                  <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                    <manifestEntries>
-                      <Main-Class>io.vertx.workshop.common.Launcher</Main-Class>
-                      <Main-Verticle>${main.verticle}</Main-Verticle>
-                    </manifestEntries>
-                  </transformer>
-                  <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                    <resource>META-INF/services/io.vertx.core.spi.VerticleFactory</resource>
-                  </transformer>
-                </transformers>
-                <artifactSet>
-                </artifactSet>
-                <outputFile>${project.build.directory}/${project.artifactId}-${project.version}-fat.jar</outputFile>
               </configuration>
             </execution>
           </executions>
@@ -215,6 +232,19 @@
                     <versionRange>[1.0.0,)</versionRange>
                     <goals>
                       <goal>compile</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore/>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>vertx-maven-plugin</artifactId>
+                    <versionRange>[1.0.4,)</versionRange>
+                    <goals>
+                      <goal>initialize</goal>
                     </goals>
                   </pluginExecutionFilter>
                   <action>
