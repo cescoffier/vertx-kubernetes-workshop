@@ -1,0 +1,522 @@
+## The Audit service
+
+The law is the law... The _Sarbanes–Oxley Act_ requires you to keep a track of every transaction you do on a
+ financial market. The audit service records the shares you buy and sell in a database. It's going to be a HSQL
+ database, but is would be similar with another database, even no-sql database.
+
+### Accessing data asynchronously
+
+As said previously, Vert.x is asynchronous and you must never block the event loop. And you know what's definitely
+blocking ? Database accesses and more particularly JDBC! Fortunately, Vert.x provides a JDBC client that is asynchronous.
+
+The principle is simple (and is applied to all clients accessing blocking systems):
+
+[plantuml, database-sequence, png]
+----
+@startuml
+autonumber
+participant Application
+participant Handler
+participant Client
+control Worker
+database Database
+
+Application -> Client : The application send the query, instruction,\n statement to the client; with a Handler
+Client -> Worker : The client enqueue in a Worker the task to be done
+Client -> Application : The client returns immediately
+Worker -> Database : The worker executes the task on the database
+Worker -> Client : When done, the worker notify the client
+Client -> Handler : The client invokes the handler \n(in the same thread as the interaction (1))\n with the operation result.
+
+@enduml
+----
+
+NOTE: _Worker_ ? Yes, Vert.x has the notion of _workers_ (a separated thread pool) to execute blocking code. It can be a
+ verticle marked as _worker_ or with the `vertx.executeBlocking` construct. However, even if possible, you should not
+ abuse from these features as it reduces the scalability of the application.
+
+However, interactions with databases are rarely a single operation, but a composition of operations. For example:
+
+1. Get a connection
+2. Drop some tables
+3. Create some tables
+4. Close the connection
+
+So, we need a way to compose these operations, and report failures when required. This is what we are going to see
+in the Audit component.
+
+### The Audit service
+
+The Audit service:
+
+1. Listens for the financial operations on the event bus
+2. Stores the received operations in a database
+3. Exposes a REST API to get the last 10 operations
+
+Interactions with the database use the `vertx-jdbc-client`, an async version of JDBC. So expect to see some SQL code
+(I know you love it).
+
+
+### Rxjava
+
+#### Intro
+
+Vert.x uses a simple callback based asynchrony and its `Future` object is an helper tool useful for callback
+coordination. RxJava implements the Reactive Extensions for the JVM and is a library for composing asynchronous and
+event-based programs.
+
+With RxJava, you model your code around data flow (called `Observable`). These data flow are pipes in which data
+transits. These `Observable` can represent finite or infinite streams, but also streams with a single element. When
+a stream is known to hold exactly one element, it is convenient to use the `Single` type. Finally a `Completable`
+represents a stream with no elements, i.e it can only complete without a value or fail.
+
+To use such reactive type, a _subscription_ operation is necessary.
+
+[source, java]
+----
+Observable<String> observable = getStringObservable();
+
+// Subscribe to the stream
+observable.subscribe(item -> {
+  // Received a String item
+  }, error -> {
+  // Error termination => no more items
+  }, () -> {
+  // Normal termination => no more items
+  });
+----
+
+Singles are simpler to work with as they hold exactly one element, they have some similarities with future/promises
+although they have noticeable differences:
+
+- a future/promise is the result of an asynchronous operation, e.g, you start a server and you get a promise of the server bind result
+- a single result usually has a side effect at subscription time, e.g you subscribe to the single, as side effect it start the server
+and the single notifies you of the bind result
+
+[source, java]
+----
+Single<String> single = getStringSingle();
+
+// Subscribe to the single
+single.subscribe(item -> {
+  // Completion with the string item
+  }, error -> {
+  // Completion with an error
+  });
+----
+
+#### Composition and transformation
+
+RxJava provides a very useful set of operators for composing and transforming asynchronous flows.
+
+We will use the main ones in this lab : `map`, `flatMap` and `zip`.
+
+The `map` operator transforms synchronously the result of an operation.
+
+[source, java]
+----
+// Transform the stream of strings into a stream of Buffer
+Observable<Buffer> observable = getStringObservable().map(s -> vertx.fileSystem().readFileBlocking(s));
+
+// Transform the string single into a Buffer single
+Single<Buffer> single = getStringSingle().map(s -> vertx.fileSystem().readFileBlocking(s));
+----
+
+The drawback of the `map` operator is the imposed synchrony, in order to retrieve the content of a file we have
+to use the _blocking_ version of the filesystem, and thus we break the Vert.x golden rule!
+
+Fortunately there is an asynchronous version called `flatMap`.
+
+[source, java]
+----
+// Transform the stream of strings into a stream of Buffer
+Observable<Buffer> observable = getStringObservable().flatMap(s -> {
+  Single<Buffer> single = vertx.fileSystem().rxReadFile();
+  return single.toObservable();
+});
+
+// Transform the string single into a Buffer single
+Single<Buffer> single = getStringSingle().flatMap(s -> {
+  Single<Buffer> single = vertx.fileSystem().rxReadFile();
+  return single;
+});
+----
+
+The `zip` operator combines the results of several `Observable`/`Single` in a single result, let's see with `Single`:
+
+[source, java]
+----
+Single<String> single1 = getStringSingle();
+Single<String> single2 = getStringSingle();
+Single<String> single3 = getStringSingle();
+
+Single<String> combinedSingle = Single.zip(single1, single2, single3, (s1,s2,s3) -> s1 + s2 + s3);
+
+combinedSingle.subscribe(s -> {
+  // Got the three concatenated strings
+}, error -> {
+  // At least one of single1, single2 or single3 failed
+});
+
+----
+
+It works similarly for `Observable`, but for the sake of the conciseness we will not study it here.
+
+### Vert.x Rx
+
+Vert.x has an Rx version of its asynchronous API packaged with the `io.vertx.*rxjava*` prefix, e.g `io.vertx.*rxjava*.core.Vertx`
+ is the Rx version of `io.vertx.core.Vertx`. The _rxified_ version of Vert.x exposes the asynchronous methods as
+ `Single` and the stream types as `Observable`.
+
+#### Vert.x streams
+
+The type `ReadStream<T>` models a reactive sequence of `T` items, for instance an `HttpServerRequest` is a `ReadStream<Buffer>`.
+
+The _rxified_ version exposes a `toObservable()` method to turn the stream into an `Observable<T>`:
+
+[source, java]
+----
+import io.vertx.rxjva.core.Vertx;
+import io.vertx.rxjva.core.http.HttpServer;
+
+...
+
+Vertx vertx = Vert.vertx();
+HttpServer server = vertx.createHttpServer();
+server.requestHandler(request -> {
+  if (request.path().equals("/upload")) {
+    Observable<Buffer> observable = request.toObservable();
+    observable.subscribe(buffer -> {
+      // Got an uploaded buffer
+      }, error -> {
+      // Got an error => no more buffers
+      }, () -> {
+      // Done => no more buffers
+    });
+  }
+});
+----
+
+In this section, we will not use `Observable` as we don't focus much on reactive streams. However we will discover and
+use `Single`.
+
+#### Vert.x singles
+
+Each asynchronous method, i.e a method having a last parameter `Handler<AsyncResult<T>>`, has an _rxified_ version, named
+ after the original method name prefixe by `rx`, with the same parameters minus the last and returning a `Single` of the
+ asynchronous type.
+
+Unlike the original method, calling the _rx_ version does not make an actual call. Instead you get a single that will
+call the actual method at subscription time.
+
+[source, java]
+----
+import io.vertx.rxjva.core.Vertx;
+import io.vertx.rxjva.core.http.HttpServer;
+
+...
+
+Vertx vertx = Vert.vertx();
+HttpServer server = vertx.createHttpServer();
+server.requestHandler(request -> ...);
+
+// The single has been created but the server is actually not starting at this point
+Single<HttpServer> listenSingle = server.rxListen(8080);
+
+// Triggers the actual start
+listenSingle.subscribe(
+  server -> {
+    // The server is started and bound on 8080
+  }, error -> {
+    // The server could not start
+  });
+----
+
+### Task - Composing methods returning Single.
+
+Open the `io.vertx.workshop.audit.impl.AuditVerticle` class. The first important detail of this verticle is its
+`start` method. As the `start` method from the Java trader, the method is asynchronous, and report its completion in the
+ given `Future` object:
+
+[source, java]
+----
+  public void start(Future<Void> future) {
+    super.start();
+
+    // creates the jdbc client.
+    jdbc = JDBCClient.createNonShared(vertx, config());
+
+    // TODO
+    // ----
+    Single<MessageConsumer<JsonObject>> ready = Single.error(new UnsupportedOperationException("not yet implemented"));
+    // ----
+
+    readySingle.doOnSuccess(consumer -> {
+      // on success we set the handler that will store message in the database
+      consumer.handler(message -> storeInDatabase(message.body()));
+    }).subscribe(consumer -> {
+      // complete the verticle start with a success
+      future.complete();
+    }, error -> {
+      // signal a verticle start failure
+      future.fail(error);
+    });
+  }
+----
+
+Vert.x would consider the verticle deploy when the `Future` is valuated. It may also report a failure if the verticle
+ cannot be started correctly.
+
+Initializing the audit service includes:
+
+* prepare the database (table)
+* start the HTTP service and expose the REST API. In addition publish this endpoint as a service
+* retrieve the message source on which the operation are sent
+
+So, it's clearly 3 independent actions, but the audit service is started only when all of them has been completed.
+
+Replace the `TODO` block with some code. This code should retrieves 3 single objects (from methods provided in the class)
+and _wait_ for the completion of the three tasks. The three singles should be combined in one `Single<MessageConsumer<JsonObject>>`.
+
+On success this single registers a message listener on the portfolio message source  storing the operation in the database
+for each received message.
+
+Its completion notifies Vert.x that the start process is completed (or successfully or not), it calls `future.complete()` and
+`future.fail(cause)`.
+
+[.assignment]
+****
+[source, java]
+----
+    Single<Void> databaseReady = initializeDatabase(config().getBoolean("drop", false));
+    Single<Void> httpEndpointReady = configureTheHTTPServer()
+        .flatMap(server -> rxPublishHttpEndpoint("audit", "localhost", server.actualPort()));
+    Single<MessageConsumer<JsonObject>> messageConsumerReady = retrieveThePortfolioMessageSource();
+    Single<MessageConsumer<JsonObject>> readySingle = Single.zip(
+        databaseReady,
+        httpEndpointReady,
+        messageConsumerReady,
+        (db, http, consumer) -> consumer);
+----
+
+First we create 3 `Single`, one per action to execute. We are going to see how they are created in a minute. Then we
+compose all of them using the `Single.zip` operator. The zip function returns the consumer single as this is the
+one we really care about.
+****
+
+### Task - Implementing a method returning a Single
+
+Now our verticle extends the `RxMicroServiceVerticle` base class, this class provides the same helper method
+  than `MicroServiceVerticle` using Rx singles.
+
+We have mentioned that async method have a signature with a `Handler` as last parameter. There is an equivalent syntax
+that returns a `Single` object when the operations they are executing are completed:
+
+[source, java]
+----
+void asyncMethod(a, b, Handler<AsyncResult<R>> handler);
+// is equivalent to
+Single<R> asyncMethod(a, b);
+----
+
+Indeed, the caller can subscribe on the returned `Single` object to execute the async operation and be notified when
+the operation has completed or failed
+
+[source, java]
+----
+Single<R> single = asyncMethod(a, b);
+single.subscribe(r  -> {
+    // Do something with the result
+  }, err -> {
+    // the operation has failed
+  });
+----
+
+Let's implement the `configureTheHTTPServer` method following this pattern. In this method we are going to use a new Vert.x
+Component: Vert.x Web. Vert.x Web is a Vert.x extension to build modern web application. Here we are going to use
+a `Router` which let us implement _REST_ APIs easily (_à la_ Hapi or ExpressJS). So:
+
+1. Create a `Router` object with: `Router.router(vertx)`
+2. Register a route (on `/`) on the router, calling `retrieveOperations`
+3. Create a HTTP server delegating the request handler to `router.accept`.
+4. Retrieve the port passed in the configuration or `0` if not set (it picks an available port), we can pick
+    a random port as it is exposed in the service record, so consumer are bound to the right port.
+5. Start the server with the `rxListen` version of the listen method that returns a single.
+
+[.assignment]
+****
+[source, java]
+----
+private Single<HttpServer> configureTheHTTPServer() {
+    // Use a Vert.x Web router for this REST API.
+    Router router = Router.router(vertx);
+    router.get("/").handler(this::retrieveOperations);
+
+    return vertx.createHttpServer()
+        .requestHandler(router::accept)
+        .rxListen(config().getInteger("http.port", 0));
+}
+----
+
+It creates a `Router`. The `Router` is an object from http://vertx.io/docs/vertx-web/java/[Vert.x web] that ease the
+creation of REST API with Vert.x. We won't go into too much details here, but if you want to implement REST API with
+Vert.x, this is the way to go. On our `Router` we declare a _route_: when a request arrive on `/`, it calls this `Handler`.
+Then, we create the HTTP server. The `requestHandler` is a specific method of the `router`, and we  return the result
+of the `rxListen` method.
+****
+
+So, the caller can call this method and get a `Single`. It can subscribe on it to bind the server and be notified
+of the completion of the operation (or failure).
+
+If you look at the `retrieveThePortfolioMessageSource`, you would see the very same pattern.
+
+### Using Async JDBC
+
+In the `start` method, we are calling `initializeDatabase`. Let's look at this method using another type of action
+composition. This method:
+
+* get a connection to the database
+* drop the table
+* create the table
+* close the connection (whatever the result of the two last operations)
+
+All these operations may fail.
+
+In the last paragraph we have seen methods returning `Single`. `Chains` are a composition of such functions:
+
+1. you have an input
+2. you execute a first `Function` taking the input from (1) and returning a `Single`
+3. you execute a second `Function` taking the input from (2) and returning a `Single`
+4. ....
+
+The completion of a chain is a `Single` object. If one of the chained operation fails, this `Single` is marked as
+failed, otherwise it is completed with the result of the last operation:
+
+[source, code]
+----
+Single<X> chain = input.flatMap(function1).flatMap(function2).flatMap(function3);
+----
+
+So to use the composition pattern, we just need a set of `Functions` and a `Single` that would trigger the chain.
+Let's create this `Single` first:
+
+[source, java]
+----
+// This is the starting point of our Rx operations
+// This single will be completed when the connection with the database is established.
+// We are going to use this single as a reference on the connection to close it.
+Single<SQLConnection> connectionRetrieved = jdbc.rxGetConnection();
+----
+
+Then, we need compose the single with the `flatMap` method that is taking a `SQLConnection` as parameter and returns
+a single that contains the result of the database initialization.
+
+1. we create the batch to execute
+2. the `rxBatch` executes the batch gives us the single returns of the operation
+3. finally we close the connection with `doAfterTerminate`
+
+[source,java]
+----
+Single<List<Integer>> resultSingle = connectionRetrieved
+  .flatMap(conn -> {
+    // When the connection is retrieved
+
+    // Prepare the batch
+    List<String> batch = new ArrayList<>();
+    if (drop) {
+      // When the table is dropped, we recreate it
+      batch.add(DROP_STATEMENT);
+    }
+    // Just create the table
+    batch.add(CREATE_TABLE_STATEMENT);
+
+    // We compose with a statement batch
+    Single<List<Integer>> next = conn.rxBatch(batch);
+
+    // Whatever the result, if the connection has been retrieved, close it
+    return next.doAfterTerminate(conn::close);
+  });
+----
+
+The `resultSingle` is the final result providing a `Single<List<Integer>>` but we will return only a `Single<Void>`
+ as the caller only cares about the global result and not the detail.
+
+This is simple achieved with the `map` operations on the single:
+
+[source,java]
+----
+return resultSingle.<Void>map(null);
+----
+
+And voilà!
+
+### Task - Async JDBC with a callback-based composition
+
+You may ask why we do such kind of composition. Let's implement a method without any composition operator (just using
+ callbacks). The `retrieveOperations` method is called when a HTTP request arrives and should return a JSON object
+ containing the last 10 operations. So, in other words:
+
+1. Get a connection to the database
+2. Query the database
+3. Iterate over the result to get the list
+4. Write the list in the HTTP response
+5. Close the database
+
+The step (1) and (2) are asynchronous. (5) is asynchronous too, but we don't have to wait for the completion. In this
+ code, don't use composition (that's the purpose of this exercise). In `retrieveOperations`, write the required code using _Handlers_ / _Callbacks_.
+
+[.assignment]
+****
+[source, java]
+----
+// 1 - we retrieve the connection
+jdbc.getConnection(ar -> {
+  SQLConnection connection = ar.result();
+  if (ar.failed()) {
+    context.fail(ar.cause());
+  } else {
+    // 2. we execute the query
+    connection.query(SELECT_STATEMENT, result -> {
+      ResultSet set = result.result();
+
+      // 3. Build the list of operations
+      List<JsonObject> operations = set.getRows().stream()
+          .map(json -> new JsonObject(json.getString("OPERATION")))
+          .collect(Collectors.toList());
+
+      // 4. Send the list to the response
+      context.response().setStatusCode(200).end(Json.encodePrettily(operations));
+
+      // 5. Close the connection
+      connection.close();
+    });
+  }
+});
+----
+****
+
+So obviously it's possible too not use composition. But imagine when you have several asynchronous operation to
+chain, it become a callback hell very quickly. So, as a recommendation: use the Vert.x composition operators or use
+the _rxified_ version of Vert.x API.
+
+### Show time !
+
+Let's see how this works.
+
+First you need to built it:
+
+[source]
+----
+cd audit-service
+mvn clean package
+----
+
+Then, you need to launch the application:
+
+[source]
+----
+ java -jar target/audit-service-1.0-SNAPSHOT-fat.jar
+----
+
+Restart and refresh the dashboard, and you should see the operations in the top right corner!
+

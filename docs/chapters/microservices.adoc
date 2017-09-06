@@ -1,0 +1,63 @@
+## Demystifying microservices
+
+Except you spent the last year in a cave, you probably have heard about _microservices_.
+So what are _microservices_? To answer this questions, let's quote from a veteran:
+
+[quote, Martin Fowler, http://martinfowler.com/articles/microservices.html]
+The microservice architectural style is an approach to developing a single application as a suite of small services,
+each running in its own process and communicating with lightweight mechanisms, often an HTTP resource API. These
+services are built around business capabilities and independently deployable by fully automated deployment machinery.
+There is a bare minimum of centralized management of these services, which may be written in different programming
+languages and use different data storage technologies.
+
+_Microservice_ is an _architectural style_, which means it is a _specialization of element and relation types, together with
+constraints and how they can be used_ footnote:[This is the definition of _architecture styles_ from the Software
+Engineering Institute.]. I believe by now, I have left you more confused than you before we started.
+
+Not to worry. Let's take another approach. Why do we need _microservices_? In one word: **agility**
+footnote:[Ability to move quickly and easily, not related to the Agile methodologies]. Let's imagine, we have
+an  application, rather large. As a large application, the maintenance is a nightmare, adding features take
+ too much time, the technology used is very outdated (What? Corba is not cool anymore?), any change needs to pass a
+ 50-steps process and be validated by 5 levels of management. Obviously there are several teams on the application with
+  different requirements and agendas. Well, we have such a _monster app_. How could we make the development and
+  maintenance of this application efficient? Microservices are one answer to this question. It aims to reduce the
+  _time to production_.
+
+To do that end, the _microservice_ architectural style proposes to:
+
+1. split the application into a set of decoupled components providing defined `services` (_defined_ means with a
+known interface or API)
+2. allow the components communicate with whatever protocol the choose, often REST, but not necessarily
+3. allow the components use whatever languages and technologies they want
+4. allow each component be developed, released and deployed independently
+5. allow the deployments be _automated_ in their own _pipeline_
+6. allow the orchestration of the whole application be reduced to the barest minimum
+
+In this lab, we won't address point 5, but you should know that Vert.x does not restricts how you deploy
+your components. You can employ whatever technology best suites your environment. whether it is ssh, ansible, puppet, docker, cloud, fabric8, or even floppy disk.
+
+Point 6, however, is interesting, and often misunderstood. It's pretty cool to develop independent pieces of software
+that magically interact at runtime. Yes, I said _magically_ but in technology we don't believe in magic. To make this happen, what we need is some form of service _discovery_ at runtime. The service discovery mechanism can achieve it's goal with any number of suitable means. These range from: hardcoding the service location in the code (which is generally a bad idea), using a DNS lookup service, or some more advanced techniques.
+
+Having a service discovery mechanism allows our system components interact transparently amongst each other regardless of location or environment. It also allows us to easily load-balance amongst our components through a round robin alogorithm, for example, thereby making our system more fault-tolerant (by locating another service provider when one breaks down).
+
+Although by definition, microservice applications are not required to be distributed, there usually are in practice. This comes with all the distributed application benefits and constraints: consensus computation (FLP), CAP theorem, consistency, monitoring, and many other reasons to fail. So microservices applications need to be designed to accommodate failures from their early implementation stage.
+
+Before we go further, there are a couple of points I would like to mention. _Microservices_ are **not** new and the concept is not rocket science. Academic papers from the 70's and 80's have defined (using different words) architectural styles very
+  close to this. Also very important point to understand is: microservices are not a silver bullet. (Unless well managed) it has the capacity to increase the complexity of your application due to its distributed nature. Lastly, a microservice architecture will not fix all your issues.
+
+The major concerns when it comes microservices are rapid delivery, adaptation, independence and replaceability. Every microservice is made to be replaceable by another providing the same _service / API / interface_ (at the core, it's basically an application of the https://en.wikipedia.org/wiki/Liskov_substitution_principle[Liskov substitution principle]).
+
+If you have been a developer for about 10 years, you might want to ask what difference is between microservices and SOA. For a lot of people it's about size. This is not always true because services don't necessarily have to be small which makes the term "microservice" quite misleading. Microservices and SOA differ purpose but the basic concepts are similar:
+
+* service : a defined feature accessible by an API, a client, a proxy, anything
+* service provider: a component implementing a service
+* service consumer: a component consuming a service
+* service discovery: the mechanism used by a consumer to find a provider
+
+Both approaches inherit from the _service oriented computing_, aiming to decompose and manage independent pieces of
+software. You may have never heard about this even if you used it: COM, Corba, Jini, OSGi, and web services are all
+different implementations of _service oriented computing_.
+
+Finally, there is a common misconception that microservices must be RESTful by nature. This can't be farther from the truth. Microservices can employ any number interaction style that best fit their purpose: RPC, events, messages, streams etc. In this lab we will using RESTful services, async RPC, and message sources.
+

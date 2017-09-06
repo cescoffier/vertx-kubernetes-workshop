@@ -1,0 +1,57 @@
+## Preface
+
+Let's start from the beginning.... _Vert.x_. What's Vert.x? That's a pretty good question, and probably a good start.
+ If you go on the http://vertx.io[Vert.x web site], Vert.x is defined as _"a toolkit for building reactive
+ applications on the JVM"_. This description is rather unclear, right? What's a _toolkit_? What are _reactive_
+ applications? In this lab, we are going to explain these words, and build an application using Vert.x illustrating
+ what Vert.x is. This application is going to be composed of _microservices_. Another buzzword that is currently trending, right ? Actually,
+ Vert.x was already promoting _microservices_  before anyone else.
+
+The developed application is going to be:
+
+* based on Vert.x (that's why you are here, right?)
+* distributed
+* built as a reactive system
+* (a bit) fun
+
+This lab offers attendees an intro-level, hands-on session with Vert.x, from the first line of code, to making
+services, to consuming them and finally to assembling everything in a consistent reactive system. It illustrates what reactive systems are, what reactive programming is, and how to build applications based on reactive microservice**s**
+(and the **s** is important).
+
+Deploying and maintaining microservices is hard. Much harder than maintaining a monolith. The are many moving pieces
+that can change / evolve / crash at anytime. To help us deploying our microservices, we are going to use Kubernetes.
+Kubernetes (commonly referred to as "K8s") is an open-source system for automating deployment, scaling and management of
+ containerized applications that was originally designed by Google and donated to the Cloud Native Computing Foundation.
+  It aims to provide a "platform for automating deployment, scaling, and operations of application containers across
+  clusters of hosts". In this lab, we are using a specific distribution of K8S named OpenShift that provide a few set
+   of features very useful to maintain our microservices. It's **NOT** required to deploy Vert.x applications on top
+   of Kubernetes. Bare metal is generally fine. We use Kubernetes in this lab because of the complexity involved when
+    dealing with multiple microservices, their updates, downtimes and so on.
+
+This is a BYOL (Bring Your Own Laptop) session, so bring your Windows, OSX, or Linux laptop. You need JDK 8+ on your
+machine, and Apache Maven (3.5+). On Windows, you will need Cygwin. The lab contain a section to install _minishift_,
+ a version of Kubernetes running your laptop.
+
+What you are going to learn:
+
+* What Vert.x is and how to use its asynchronous non-blocking development model
+* How to develop microservices with Vert.x with several types of services, and service discovery
+* How to deploy microservices on Kubernetes, and how Vert.x interacts with Kubernetes
+* What `verticles` are and how to use them 
+* How to use the Vert.x event bus to send and receive messages
+* How to expose HTTP endpoints with Vert.x, and also how to consume them
+* How to compose asynchronous actions
+* How to use several languages in the same application
+* How to use databases with Vert.x
+* How to manage failures with async results, futures, exception handlers and circuit breakers
+* How to use Vert.x with RxJava
+* How to scale microservices, and use Kubernetes resilience
+
+And many more...
+
+This lab is a _à la carte_ lab. Once you have done the basic installation and introduction, you can pick one of the
+topic you are interested in. For instance, after the introduction, if you are interested by gRPC, you can jump to the
+ gRPC section, and try it out.
+
+ Don't expect to complete this lab in 3 hours, it will take you a lot more. But that's not a big deal. Pick the topic
+  you want, learn what you want, and come back later to learn more.

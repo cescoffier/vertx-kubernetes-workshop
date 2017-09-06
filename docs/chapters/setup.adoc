@@ -1,0 +1,53 @@
+## Let's start !
+
+### Getting the code
+
+[source]
+----
+git clone https://github.com/cescoffier/vertx-microservices-workshop
+----
+
+You can import the code in your IDE as a Maven project. You can refer to your IDE documentation to know how to import Maven projects.
+
+For Eclipse:
+
+1. Click on `File - Import ... - Maven - Existing Maven Projects`
+2. Select the location where you cloned the sources
+3. Click _Finish_ and wait...
+
+You are going to see a couple of compilation errors. This is because Eclipse does not mark the `src/main/generated`
+directories as _source root_ by default. Right-click on `portfolio-service/src/main/generated` and select _Build Path
+-> Use as Source Folder_.
+
+TIP: A complete solution is given in the `solution` directory.
+
+### Build
+
+The build is managed using Apache Maven. Compile everything using:
+
+[source]
+----
+cd vertx-microservices-workshop
+mvn clean install
+----
+
+As said previously, Vert.x does not depend on Apache Maven. You can use any build tool (or even no build tool).
+
+### Clustering and Service Discovery infrastructure
+
+It's about time to start. If you remember the microservice section, we need some service discovery mechanism.
+Fortunately, Vert.x offers a service discovery mechanism. To let every component discover the services, it needs to
+store the service _record_ in a location that every one can access.
+
+By default, Vert.x service discovery is going to use a distributed map accessible by all the members of the
+cluster. So, when you start your Vert.x application and enable the cluster mode, it joins a cluster. This cluster
+lets nodes:
+
+* to come and go, and so manage **member** discovery (_member != service_)
+* to share data such as distributed maps, locks, counters...
+* to access the event bus
+
+In our context, you don't need to configure anything. The lab provides a cluster configuration using unicast and the
+`127.0.0.1` IP (so you won't see the services from your neighbors). The cluster is built on top of Hazelcast. You can
+ check the configuration in `vertx-workshop-common/src/main/resources/cluster.xml`.
+
