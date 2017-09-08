@@ -12,9 +12,13 @@
 
   <properties>
     <vertx.version>3.5.0.beta1</vertx.version>
+    <source.dir>src/main/java</source.dir>
+    <vertx.cluster.name>none</vertx.cluster.name>
+    <workshop.solution>false</workshop.solution>
   </properties>
 
   <modules>
+    <module>currency-3rdparty-service</module>
     <module>vertx-workshop-common</module>
     <module>quote-generator</module>
     <module>portfolio-service</module>
@@ -22,6 +26,16 @@
     <module>compulsive-traders</module>
     <module>trader-dashboard</module>
   </modules>
+
+  <profiles>
+    <profile>
+      <id>solution</id>
+      <properties>
+        <source.dir>src/main/solution</source.dir>
+        <workshop.solution>true</workshop.solution>
+      </properties>
+    </profile>
+  </profiles>
 
   <dependencyManagement>
     <dependencies>
@@ -40,7 +54,6 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/io.vertx/vertx-lang-scala_2.12 -->
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-lang-scala_2.12</artifactId>
@@ -67,10 +80,6 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-client</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-infinispan</artifactId>
     </dependency>
 
     <!-- Microservice toolbox -->
@@ -118,6 +127,7 @@
   </dependencies>
 
   <build>
+    <sourceDirectory>${source.dir}</sourceDirectory>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -171,6 +181,24 @@
               </goals>
             </execution>
           </executions>
+          <configuration>
+            <resources>
+              <labels>
+                <pod>
+                  <property>
+                    <name>cluster</name>
+                    <value>${vertx.cluster.name}</value>
+                  </property>
+                </pod>
+                <all>
+                  <property>
+                    <name>solution</name>
+                    <value>${workshop.solution}</value>
+                  </property>
+                </all>
+              </labels>
+            </resources>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
