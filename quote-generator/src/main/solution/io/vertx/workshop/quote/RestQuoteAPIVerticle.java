@@ -25,7 +25,9 @@ public class RestQuoteAPIVerticle extends AbstractVerticle {
                 // Quotes are json objects you can retrieve from the message body
                 // The map is structured as follows: name -> quote
                 // ----
-
+                System.out.println("Got a quote (solution)");
+                JsonObject quote = message.body(); // 1
+                quotes.put(quote.getString("name"), quote); // 2
                 // ----
             });
 
@@ -42,8 +44,22 @@ public class RestQuoteAPIVerticle extends AbstractVerticle {
                 // If the symbol is set but not found, you should return 404.
                 // Once the request handler is set,
 
-                response
-                    .end(Json.encodePrettily(quotes));
+                String company = request.getParam("name");
+                if (company == null) {
+                    String content = Json.encodePrettily(quotes);
+                    response
+                        .end(content);
+                } else {
+                    JsonObject quote = quotes.get(company);
+                    if (quote == null) {
+                        response.setStatusCode(404).end();
+                    } else {
+                        response.end(quote.encodePrettily());
+                    }
+                }
+
+//          response
+//              .end(Json.encodePrettily(quotes));
 
                 // ----
 
