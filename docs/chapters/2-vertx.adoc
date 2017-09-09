@@ -134,6 +134,7 @@ NOTE: Don't forget to stop the application between runs.
         .requestHandler(req -> req.response().end("hello"))
         .listen(8080);
 ----
+****
 
 ### Exercise 2 - Using verticles
 
@@ -169,6 +170,7 @@ verticle is always executed by the same thread.
         .requestHandler(req -> req.response().end(Thread.currentThread().getName()))
         .listen(8080);
 ----
+****
 
 ### Exercise 3 - Do not block the event loop
 
@@ -192,6 +194,7 @@ vertx.createHttpServer()
     })
     .listen(8080);
 ----
+****
 
 You may wonder how you will be able to call blocking code. Don't worry, Vert.x provides several way to do so. A
 constructs named `executeBlocking` and a type of verticle (named _worker_) not executed on the event loop.
@@ -229,6 +232,7 @@ vertx.setPeriodic(2000, l -> {
     eventBus.send("greetings", json);
 });
 ----
+****
 
 Then, open the `io.vertx.workshop.exercise.Exercise4ReceiverVerticle` class and follow the instructions to receive
 the messages sent by the other verticle. To achieve this, register a `consumer` on the `greetings` address and
@@ -247,6 +251,7 @@ vertx.eventBus().<JsonObject>consumer("greetings", msg -> {
     System.out.println(msg.body().encodePrettily());
 });
 ----
+****
 
 To launch this exercise, use the `io.vertx.workshop.exercise.Exercise4#main` method. If implemented correctly you
 would see the greeting messages printed on the console. Don't forget to stop the application before switching to the
@@ -273,12 +278,12 @@ EventBus eventBus = vertx.eventBus();
 // parameter is passed in the incoming message body (a name). For example, if the incoming message is the
 // String "vert.x", the reply contains: `{"message" : "hello vert.x"}`.
 // Unlike the previous exercise, the incoming message has a `String` body.
-// TODO
 eventBus.<String>consumer("greetings", msg -> {
     JsonObject json = new JsonObject().put("message", "hello " + msg.body());
     msg.reply(json);
 });
 ----
+****
 
 Then, edit the `io.vertx.workshop.exercise.Exercise5HttpVerticle` class. In this verticle, we need to create a HTTP
 server. The `requestHandler` extracts the query parameter `name` (or use `world` if not set), send a message on the
@@ -313,6 +318,7 @@ vertx.createHttpServer()
     })
     .listen(8080);
 ----
+****
 
 Launch the exercise using the `Exercise5#main` method. Check the result by opening your browser to
 http://localhost:8080 (should display `hello world`) and http://localhost:8080?name=vert.x (should display `hello
@@ -367,6 +373,7 @@ statements containing the `reactivex` package. This package contains the _RX-ifi
     })
     .listen(8080);
 ----
+****
 
  
 Launch the exercise using the `Exercise6#main` method. Check the result by opening your browser to
@@ -377,3 +384,5 @@ vert.x`).
 
 By now, you should have a better understanding of Vert.x and how to use it. But that's just the beginning. Serious
 things are coming...
+
+
