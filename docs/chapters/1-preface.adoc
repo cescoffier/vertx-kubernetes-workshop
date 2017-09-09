@@ -56,3 +56,4 @@ topics you are interested in. For instance, after the introduction, if you are i
 
  Don't expect to complete this lab in 3 hours, it will take you a lot more. But that's not a big deal. Pick the topic
   you want, learn what you want, and come back later to learn more.
+

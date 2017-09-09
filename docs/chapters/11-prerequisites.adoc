@@ -86,3 +86,4 @@ mvn clean install
 ----
 
 As said previously, Vert.x does not depend on Apache Maven. You can use any build tool (or even no build tool).
+

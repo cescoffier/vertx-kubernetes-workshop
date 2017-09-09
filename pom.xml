@@ -25,6 +25,7 @@
     <module>audit-service</module>
     <module>compulsive-traders</module>
     <module>trader-dashboard</module>
+    <module>vertx-exercises</module>
   </modules>
 
   <profiles>
