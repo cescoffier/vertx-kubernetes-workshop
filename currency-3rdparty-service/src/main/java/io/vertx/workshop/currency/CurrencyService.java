@@ -11,7 +11,7 @@ import io.vertx.ext.web.handler.BodyHandler;
 import java.util.Random;
 
 /**
- * @author <a href="http://escoffier.me">Clement Escoffier</a>
+ * @author Someone you don't want to know...
  */
 public class CurrencyService extends AbstractVerticle {
 

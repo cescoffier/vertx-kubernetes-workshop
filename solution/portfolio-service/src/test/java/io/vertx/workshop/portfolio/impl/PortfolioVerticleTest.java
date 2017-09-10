@@ -13,15 +13,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 
-/**
- * @author <a href="http://escoffier.me">Clement Escoffier</a>
- */
 public class PortfolioVerticleTest {
 
   @Test
   public void testServiceAccess() {
     Vertx vertx = Vertx.vertx();
-    vertx.deployVerticle(PortfolioVerticle.class.getName());
+    vertx.deployVerticle(io.vertx.workshop.portfolio.impl.PortfolioVerticle.class.getName());
 
     PortfolioService proxy = ProxyHelper.createProxy(PortfolioService.class, vertx, PortfolioService.ADDRESS);
 

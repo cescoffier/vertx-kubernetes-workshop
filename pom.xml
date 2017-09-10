@@ -26,6 +26,7 @@
     <module>compulsive-traders</module>
     <module>trader-dashboard</module>
     <module>vertx-exercises</module>
+    <module>microservices-exercises</module>
   </modules>
 
   <profiles>

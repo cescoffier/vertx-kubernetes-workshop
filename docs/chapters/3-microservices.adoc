@@ -10,6 +10,8 @@ services are built around business capabilities and independently deployable by 
 There is a bare minimum of centralized management of these services, which may be written in different programming
 languages and use different data storage technologies.
 
+### Microservice 101
+
 _Microservice_ is an _architectural style_, which means it is a _specialization of element and relation types, together with
 constraints and how they can be used_ footnote:[This is the definition of _architecture styles_ from the Software
 Engineering Institute.]. I believe by now, I have left you more confused than you before we started.
@@ -61,20 +63,108 @@ different implementations of _service oriented computing_.
 
 Finally, there is a common misconception that microservices must be RESTful by nature. This can't be farther from the truth. Microservices can employ any number interaction style that best fit their purpose: RPC, events, messages, streams etc. In this lab we will using RESTful services, async RPC, and message sources.
 
-It tends to not be easy to use service discovery when we are not used to. So, let's do a few exercies about it:
+It tends to not be easy to use service discovery when we are not used to. So, let's do a few exercises about it. To continue introducing
+Rx Java constructs, these exercises use the RX Java 2 API offered by vert.x
 
-### Exercise - Publishing a service
+### Exercise 1 - Publishing a service
 
-// Write a small app creating a HTTP service and publishing it
-// The app has 1 verticle
+In this first exercise, we are just going to publish a service. A service is described by a `record` containing
+enough metadata for a consumer to select the right service and create a _client_.
 
+Open the `io.vertx.workshop.exercise.microservice.Exercise1Verticle` class from the `microservices-exercises` project
+. This class already contains some code to create an HTTP endpoint using Vert.x Web, exposed on the port 8080.
+Once ready to serve, and to let the other parts of your system consume this service, we need to advertise it. This is
+achieve in the `publish` method that you need to write.
 
-### Exercise - Consuming a service using service references
+First you need to create a `record` for the service. The `io.vertx.reactivex.servicediscovery.types.HttpEndpoint`
+class contains methods to create `records` for HTTP endpoint. Once you have the record, you call `rxPublish` on the
+Vert.x service discovery. This stores the record and let the other parts of your system be aware of its availability.
 
-// Reuse the same app but deploy another verticle to retrieve and consume the service
+[.assignment]
+****
+[source, java]
+----
+private Single<Record> publish(HttpServer server) {
+    // 1 - Create a service record using `io.vertx.reactivex.servicediscovery.types.HttpEndpoint.createRecord`.
+    // This record define the service name ("greetings"), the host ("localhost"), the server port and the root ("/")
+    Record record = HttpEndpoint.createRecord("greetings", "localhost", server.actualPort(), "/");
 
-### Exercise - Consuming a service using sugars
+    // 2 - Call the rxPublish method with the created record and return the resulting single
+    return discovery.rxPublish(record);
+}
+----
+****
 
-// Rewrite the second verticle to retrieve directly the Web Client
+Notice also the `stop` method from the verticle class. When the verticle is stopped we must unregister the service.
+For this, the published record is stored and use in the `rxUnpublish` method. As this operation is also asynchronous,
+ the `stop` method use a `Future` to indicate the completion of the method.
+
+### Exercise 2 - Consuming a service using service references
+
+The previous exercise has published a service. Vert.x provides two ways to retrieve this service:
+
+* a low level API where the consumer retrieve the `record` (service description), then retrieve a `reference` (service
+binding), and finally get the _client_ (service object)
+* a higher-level API managing the record and reference parts transparently.
+
+In this exercise we use the first approach to better understand the different concepts. Open the `io.vertx.workshop.exercise.microservice.Exercise2Verticle` class, and follow the instructions to retrieve the service.
+
+TIP: `map` vs. `flatMap` - This code uses `map` and `flatMap`. `map` is used when the operation is synchronous and
+return a non-reactive type. `flatMap` is used when the result is a reactive type (`Single`, `Maybe`, `Completable`,
+`Observable` or `Flowable`). The result denotes an asynchronous operation completed "later". When this operation
+progresses or completes, the next processing stage is executed.
+
+TIP: the `WebClient` is an asynchronous Vert.x HTTP client. To use it, create ` _request_ using the `get` (or one of
+the other proposed method), indicating the path. Then call `rxSend` to create the `Single` (a reactive type with a
+_single_ result resolved "later"). Once you get the `HttpResponse` you can use the `bodyAsString` method to get the
+payload.
+
+[.assignment]
+****
+[source, java]
+----
+// 1 - Get the service record using `rxGetRecord`. Pass the lambda `svc -> svc.getName().equals("greetings")` as
+// parameter to retrieve the service with the name "greetings"
+// 2 - With the record (`.map`), get the service reference using `discovery.getReference`
+// 3 - With the reference (`.map`), get a WebClient (Vert.x http client) using `ref.getAs(WebClient.class)`
+// 4 - With the client (`.flatMap`), invoke the service using: `client.get("/greetings/vert.x-low-level-api").rxSend()`
+// 5 - With the response (`.map`), extract the body as string (`bodyAsString` method)
+// 6 - Finally subscribe and print the result on the console
+discovery.rxGetRecord(svc -> svc.getName().equals("greetings"))
+    .map(rec -> discovery.getReference(rec))
+    .map(ref -> ref.getAs(WebClient.class))
+    .flatMap(client -> client.get("/greetings/vert.x-low-level-api").rxSend())
+    .map(HttpResponse::bodyAsString)
+    .subscribe(res -> System.out.println("Result from the greeting service " + res));
+----
+****
+
+### Exercise 3 - Consuming a service using sugars
+
+This exercise is equivalent to the previous one, but use the higher-level API. Use the method `io.vertx.reactivex.servicediscovery.types.HttpEndpoint#rxGetWebClient` to retrieve a `WebClient` directly.
+
+[.assignment]
+****
+[source, java]
+----
+// 1 - Get the Web Client using the `HttpEndpoint.rxGetWebClient` method. Use the same lambda as in the
+// previous exercise.
+// 2 - Invoke the HTTP service as in the previous exercise
+// 3 - Extract the body as String
+// 4 - Subscribe and display the result on the console
+// TODO
+HttpEndpoint.rxGetWebClient(discovery, svc -> svc.getName().equals("greetings"))
+    .flatMap(client -> client.get("/greetings/vert.x").rxSend())
+    .map(HttpResponse::bodyAsString)
+    .subscribe(res -> System.out.println("Result from the greeting service " + res));
+----
+****
+
+### Time to go further
+
+Microservices are a great way to improve the _agility_ of your product. But, it introduces a lot of moving parts, and
+ keeping everything on track is not a simple task. Service discovery let the different parts discovery themselves and
+  interact, but what about deployment, monitoring, and other administration tasks? For these, we will look into
+  containers and Kubernetes in the next chapter.
 
 

@@ -10,8 +10,6 @@ import java.util.Map;
 
 /**
  * This verticle exposes a HTTP endpoint to retrieve the current / last values of the maker data (quotes).
- *
- * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class RestQuoteAPIVerticle extends AbstractVerticle {
 

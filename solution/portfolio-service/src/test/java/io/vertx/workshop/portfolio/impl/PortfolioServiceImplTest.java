@@ -13,9 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-/**
- * @author <a href="http://escoffier.me">Clement Escoffier</a>
- */
+
 @RunWith(VertxUnitRunner.class)
 public class PortfolioServiceImplTest {
 
@@ -28,7 +26,7 @@ public class PortfolioServiceImplTest {
     vertx = Vertx.vertx();
 
     Async async = tc.async();
-    vertx.deployVerticle(PortfolioVerticle.class.getName(), id -> {
+    vertx.deployVerticle(io.vertx.workshop.portfolio.impl.PortfolioVerticle.class.getName(), id -> {
       service = ProxyHelper.createProxy(PortfolioService.class, vertx, PortfolioService.ADDRESS);
       service.getPortfolio(ar -> {
         if (!ar.succeeded()) {

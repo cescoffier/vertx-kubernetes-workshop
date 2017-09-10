@@ -14,9 +14,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-/**
- * @author <a href="http://escoffier.me">Clement Escoffier</a>
- */
+
 public class GeneratorConfigVerticleTest {
 
     @Test
