@@ -84,3 +84,7 @@ samp {
 .quoteblock blockquote:before {
     vertical-align: baseline;
 }
+
+.quoteblock blockquote, .quoteblock blockquote, td.content {
+    font-size: inherit;
+}
