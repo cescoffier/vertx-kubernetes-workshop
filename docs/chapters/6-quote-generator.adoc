@@ -73,7 +73,7 @@ Let's start with the `pom.xml` file. This file specifies the Maven build:
 3. Build a _fat-jar_
 
 A _fat-jar_ (also called _uber_ jar or _shaded_ jar) is a convenient way to package a Vert.x application. It creates an
-_über-jar_ containing your application and all its dependencies, including Vert.x. Then, to launch it, you just need
+_uber-jar_ containing your application and all its dependencies, including Vert.x. Then, to launch it, you just need
 to use `java -jar <jar name>` without having to handle the `CLASSPATH`. Wait, I told you that Vert.x does not dictate a
 type of packaging. It's true, fat jars are convenient, but they are not the only way. You can use plain (not fat) jars,
 OSGi bundles...
