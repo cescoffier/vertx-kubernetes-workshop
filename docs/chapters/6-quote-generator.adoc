@@ -4,18 +4,18 @@ Disclaimer, the quote generator is unrealistic, and is basically a set of random
 
 In this chapter, we are going to see:
 
-* how are structure projects and how they are built and deployed
+* how projects are structured, built, and deployed
 * how to use the event bus to receive messages
 * how to implement HTTP actions
 * how to use RX Java 2 to avoid callbacks
 
 
-This chapter is the introduction of the lab. We recommend you to do it so you have a better understanding of the
+This chapter is the introduction of the lab. We recommend that you do it so you have a better understanding of the
 structured exchanges between the different microservices.
 
 ### Project structure
 
-Let's have a look to the project, as every other project are structured the same way.
+Let's have a look at the project, as every other project are structured the same way.
 
 [source]
 ----
@@ -43,10 +43,10 @@ Let's start with the `pom.xml` file. This file specifies the Maven build:
 2. Compile the java code and process resources (if any)
 3. Build a _fat-jar_
 
-A _fat-jar_ (also called _uber_ jar or _shaded_ jar) is a convenient way to package a Vert.x application. It creates a
+A _fat-jar_ (also called _uber_ jar or _shaded_ jar) is a convenient way to package a Vert.x application. It creates an
 _über-jar_ containing your application and all its dependencies, including Vert.x. Then, to launch it, you just need
-to use `java -jar ....`, without having to handle the `CLASSPATH`. Wait, I told you that Vert.x does not dictate a
-type of packaging. It's true, fat jars are convenient, but it's not the only way, you can use plain (not fat) jars,
+to use `java -jar <jar name>` without having to handle the `CLASSPATH`. Wait, I told you that Vert.x does not dictate a
+type of packaging. It's true, fat jars are convenient, but they are not the only way. You can use plain (not fat) jars,
 OSGi bundles...
 
 The `pom.xml` file also contains a set of properties used to configure the application:
@@ -56,9 +56,9 @@ The `pom.xml` file also contains a set of properties used to configure the appli
 
 ### Verticle
 
-As you may have noticed, the code is structured in 3 `verticles`, but what are these? Verticles is a way to structure
+As you may have noticed, the code is structured in 3 `verticles`, but what are these? Verticles are a way to structure
  Vert.x application code. It's not mandatory, but it is quite convenient. A verticle is a chunk of code that is
- deployed on top of a Vert.x instance. A verticle has access to the instance of `vertx` on which it's deployed, and
+ deployed on top of a Vert.x instance. A verticle has access to the instance of `vertx` on which it's deployed and
  can deploy other verticles.
 
 Let's open the `GeneratorConfigVerticle` class, and look at the `start` method:
@@ -95,44 +95,44 @@ public void start(Future<Void> future) {
 }
 ----
 
-This method retrieves the configuration, instantiate the verticles (5 verticles are deployed) and publish the
+This method retrieves the configuration, instantiates the verticles (5 verticles are deployed), and publishes the
 services in the service discovery.
 
 First, notice the method signature. It receives a `Future` object indicating that the start is asynchronous. Indeed,
-all the actions made in this methods are asynchronous. So, when the caller thread reach the end of the method, the
-actions may have not completed. So we use this given `Future` to indicate when the process has completed (or failed).
+all the actions made in this method are asynchronous. So, when the caller thread reaches the end of the method, the
+actions may have not completed. We use this given `Future` to indicate when the process has completed (or failed).
 
 The `start` method:
 
 1. retrieves the configuration (giving the "fake" company settings)
-2. deploys on verticle per defined companies
+2. deploys one verticle per defined company
 3. deploys the `RestQuoteAPIVerticle`
 4. exposes the `market-data` message source
 5. notifies the given `Future` of the successful completion or failure
 
 To retrieve the configuration the verticle needs a `ConfigRetriever`. This object allows retrieving configuration
-chunks from different stores (such as git, files, http...). Here we just loads the content of the `config.json` file
-located in the `src/main/resources` directory. The configuration is a `JsonObject`. Vert.x heavily uses JSON, so you are
+chunks from different stores (such as git, files, http, etc.). Here we just load the contents of the `config.json` file
+located in the `src/main/resources` directory. The configuration is a `JsonObject`. Vert.x uses JSON heavily, so you are
  going to see a lot of JSON in this lab.
 
 Once we have the retriever, we can retrieve the configuration. This is an asynchronous method (`rxGetConfig`)
-returning a `Single` (a stream containing one item). When the configuration is retrieved, we extract the `companies`
-array from it and deploys one verticle per defined `company`. The deployment is also asynchronous and done with
+returning a `Single` (a stream containing one item). After the configuration is retrieved, we extract the `companies`
+array from it and deploy one verticle per defined `company`. The deployment is also asynchronous and done with
 `rxDeployVerticle`. These _company_ verticles simulate the value of the stocks. The quotes are sent on the event bus
 on the `market` address.
 
-When the _company_ verticles are deployed, we deploy another verticle providing a HTTP API to access market data.
+When the _company_ verticles are deployed, we deploy another verticle providing an HTTP API to access market data.
 The last part of the method is about the service discovery mentioned in the microservice section. This component
 generates quotes sent on the event bus. But to let other components discover where the messages are sent (_where_
-means on which address), it registers it. `market-data` is the name of the service, `ADDRESS` is the event bus
+means on which address), it registers it. `market-data` is the name of the service, `ADDRESS` (a static final variable defined as `market`) is the event bus
 address on which the messages are sent.
 
-Finally when everything is done we report the status on the given `Future` object.
+Finally, when everything is done, we report the status on the given `Future` object.
 
 
 Remember, Vert.x is promoting an asynchronous, non-blocking development model. Retrieving the configuration,
 deploying verticles, publishing a service may take time, as we cannot block the event loop, these methods are asynchronous.
-This code use RX Java 2 and asynchronous method are prefixed with `rx`. Then returns a `Single` emitting the result
+This code uses RX Java 2 and asynchronous methods are prefixed with `rx`. Upon completion the method returns a `Single` emitting the result
 or a failure.
 
 The failure management can be made at any stage, but generally, it's done in the `subscribe` method:
@@ -150,21 +150,21 @@ The failure management can be made at any stage, but generally, it's done in the
  });
 ----
 
-If you remember the architecture, the quote generator also provides a HTTP endpoint returning the last values of the
-quotes (but, you are going to work on it). But this service is not explicitly published in the service discovery.
-It's because Kubernetes is taking care of this part. The Vert.x service discovery interacts with Kubernetes
+If you remember the architecture, the quote generator also provides an HTTP endpoint returning the last values of the
+quotes (but, you are going to work on it). Note that this service is not explicitly published in the service discovery.
+That's because Kubernetes is taking care of this part. The Vert.x service discovery interacts with Kubernetes
 _services_, so all Kubernetes services can be retrieved by Vert.x.
 
 ### The quote REST endpoint
 
 It's time for you to develop some parts of the application (I know you have pins and needles in your fingers). Open the
-`RestQuoteAPIVerticle`. It's a verticle class extending `AbstractVerticle`. In the `start` method you need to:
+`RestQuoteAPIVerticle` file. It's a verticle class extending `AbstractVerticle`. In the `start` method you need to:
 
-1. Receive the an event bus _market_ messages to collect the last quotations (in the `quotes` map)
-2. Handle HTTP requests to return the list of quotes, or a single quote if the `name` (query) param is set.
+1. Receive the event bus _market_ messages to collect the last quotations (in the `quotes` map)
+2. Handle HTTP requests to return the list of quotes or a single quote if the `name` (query) param is set.
 
 In this example we are using streams (`Flowable`). Streams are an important part of reactive programming and
-architecture. So it's important to understand how they work and how we manipulate them.
+architecture. So, it's important to understand how they work and how we manipulate them.
 
 Let's do that....
 
@@ -172,8 +172,8 @@ Let's do that....
 
 The first action is about observing the stream of _market_ messages. This is done using
 `vertx.eventBus().<JsonObject>consumer(GeneratorConfigVerticle.ADDRESS).toFlowable()`. We now have the stream of
-message, but we need to extract the JSON body and populate the `quotes` map. Implement the missing logic that extract the
- body of the message (with the `body()` method), and then put `name -> quote` in the `quotes` map.
+messages, but we need to extract the JSON body and populate the `quotes` map. Implement the missing logic that extracts the
+ body of the message (with the `body()` method), and then puts `name -> quote` in the `quotes` map.
 
 [.assignment]
 ****
@@ -192,12 +192,12 @@ message, but we need to extract the JSON body and populate the `quotes` map. Imp
     })
 ----
 
-First, it retrieves the message body (1). It's a JSON object, and stores it in the `quotes` map (2).
+First, it retrieves the message body (1) and then stores it in the `quotes` map (2). Note that it's a JSON object.
 ****
 
 #### Task - Implementing a Handler to handle HTTP requests
 
-Now that you have the `quotes`, let's use it to handle HTTP request. The code already creates the HTTP server and
+Now that you have the `quotes`, let's use them to handle HTTP requests. The code already creates the HTTP server and
 provides the stream of HTTP requests. The stream emits an item for every HTTP request received by the server. So, you
  need to handle the request and write the response.
 
@@ -220,7 +220,7 @@ TIP: To create the JSON representation of an object, you can use the `Json.encod
 ----
 server.requestStream().toFlowable()
     .doOnNext(request -> {
-        HttpServerResponse response = request.response()            // <1>
+        HttpServerResponse response = request.response()           // <1>
             .putHeader("content-type", "application/json");
 
         // TODO Handle the HTTP request
@@ -237,14 +237,14 @@ server.requestStream().toFlowable()
         } else {
             JsonObject quote = quotes.get(company);
             if (quote == null) {
-                response.setStatusCode(404).end();                  // <5>
+                response.setStatusCode(404).end();                 // <5>
             } else {
                 response.end(quote.encodePrettily());
             }
         }
         // ----
     })
-.subscribe();                                                       // <6>
+.subscribe();                                                      // <6>
 ----
 <1> Get the `response` object from the `request`
 <2> Gets the `name` parameter (query parameter)
@@ -255,7 +255,7 @@ server.requestStream().toFlowable()
 ****
 
 You may wonder why synchronization is not required. Indeed we write in the map and read from it without any
-synchronization constructs. Here is one of the main feature of Vert.x: all this code is going to be executed by
+synchronization constructs. Here is one of the main features of Vert.x: all this code is going to be executed by
 the **same** event loop, so it's always accessed by the **same** thread, never concurrently.
 
 TIP: The `Map<String, JsonObject>` could be replaced by a simple `JsonObject` as they behave as a `Map<String, Object>`.
