@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.vertx.workshop</groupId>
+    <artifactId>vertx-kubernetes-workshop</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>micro-trader-dashboard</artifactId>
+
+  <properties>
+    <!-- Main verticle -->
+    <vertx.verticle>io.vertx.workshop.dashboard.DashboardVerticle</vertx.verticle>
+
+    <vertx.cluster.name>vertx-cluster</vertx.cluster.name>
+    <vertx.console.version>c546f3d</vertx.console.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.github.yunyu.vertx-console</groupId>
+      <artifactId>vertx-console-base</artifactId>
+      <version>${vertx.console.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.yunyu.vertx-console</groupId>
+      <artifactId>vertx-console-metrics</artifactId>
+      <version>${vertx.console.version}</version>
+    </dependency>
+    <!-- Insert console pages here, e.g. -->
+    <dependency>
+      <groupId>com.github.yunyu.vertx-console</groupId>
+      <artifactId>vertx-console-services</artifactId>
+      <version>${vertx.console.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-dropwizard-metrics</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient_hotspot</artifactId>
+      <version>0.0.23</version>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient_dropwizard</artifactId>
+      <version>0.0.23</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.yunyu</groupId>
+      <artifactId>prometheus-jvm-extras</artifactId>
+      <version>ee279b1</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-service-discovery-bridge-kubernetes</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.25</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.yunyu.vertx-console</groupId>
+      <artifactId>vertx-console-circuit-breakers</artifactId>
+      <version>${vertx.console.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.yunyu.vertx-console</groupId>
+      <artifactId>vertx-console-eventbus</artifactId>
+      <version>${vertx.console.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.yunyu.vertx-console</groupId>
+      <artifactId>vertx-console-http-clients</artifactId>
+      <version>${vertx.console.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.yunyu.vertx-console</groupId>
+      <artifactId>vertx-console-pools</artifactId>
+      <version>${vertx.console.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-infinispan</artifactId>
+      <exclusions>
+        <exclusion>
+          <artifactId>jgroups</artifactId>
+          <groupId>org.jgroups</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jgroups.kubernetes</groupId>
+      <artifactId>jgroups-kubernetes</artifactId>
+      <version>1.0.1.Final</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>vertx-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>fabric8-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>

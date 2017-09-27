@@ -27,6 +27,7 @@
     <module>trader-dashboard</module>
     <module>vertx-exercises</module>
     <module>microservices-exercises</module>
+    <module>micro-trader-dashboard</module>
   </modules>
 
   <profiles>
