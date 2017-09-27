@@ -11,7 +11,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <vertx.version>3.5.0.beta1</vertx.version>
+    <vertx.version>3.5.0.Beta1</vertx.version>
     <source.dir>src/main/java</source.dir>
     <vertx.cluster.name>none</vertx.cluster.name>
     <workshop.solution>false</workshop.solution>
