@@ -10,8 +10,8 @@ also exposes a HTTP endpoint to retrieve the last quote of each company.
 mvn clean package
 ```
 
-## Run
+## Deploy
 
 ```
-java -jar target/quote-generator-1.0-SNAPSHOT-fat.jar
+mvn fabric8:deploy
 ```

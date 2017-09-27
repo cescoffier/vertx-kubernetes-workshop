@@ -20,21 +20,50 @@ Let's have a look at the project, as every other project are structured the same
 [source]
 ----
 .
+|-- README.md  <----- A readme containing the description and (build) instructions
+|-- pom.xml  <----- The project build file
+|-- src
+|   |-- main
+|   |   |-- fabric8
+|   |   |   `-- deployment.yml  <----- The Kubernetes deployment customization
+|   |   |-- java
+|   |   |   `-- io/vertx/workshop/quote  <----- The source file you need to complete
+|   |   |                   |-- GeneratorConfigVerticle.java
+|   |   |                   |-- MarketDataVerticle.java
+|   |   |                   `-- RestQuoteAPIVerticle.java
+|   |   |-- resources  <----- The resources used at runtime
+|   |   |   |-- config.json  <----- The configuration listing the companies
+|   |   |   `-- jgroups-kubernetes.xml  <----- The cluster configuration
+|   |   `-- solution
+|   |       `-- io/vertx/workshop/quote  <----- The complete code (including the answers to the assignments)
+|   |                          |-- GeneratorConfigVerticle.java
+|   |                          |-- MarketDataVerticle.java
+|   |                          `-- RestQuoteAPIVerticle.java
+|   `-- test
+|       |-- java
+|       |   `-- io/vertx/workshop/quote  <----- The test cases
+|       |                         |-- GeneratorConfigVerticleTest.java
+|       |                         `-- MarketDataVerticleTest.java
+|       `-- resources  <----- resources used for tests
+`-- target  <----- output directory
+
+
+.
 ├── README.md <--- project description with the build and run instructions
 ├── pom.xml <--- the Maven file
 └── src
     |
     ├── fabric8 <--- contains the Kubernetes / Openshift customization
     ├── solution <--- contains the complete code (build with -Psolution)
-    └── main
-        ├── java
-        |    └── io.vertx.workshop.quote
-        |                    ├── GeneratorConfigVerticle.java <--- the verticles
-        |                    ├── MarketDataVerticle.java
-        |                    └── RestQuoteAPIVerticle.java
-        └── resources
-             └── config.json <--- the configuration
-             └── jgroups-kubernetes.xml <--- the cluster configuration
+    ├── main
+    |    ├── java
+    |    |    └── io.vertx.workshop.quote
+    |    |                    ├── GeneratorConfigVerticle.java <--- the verticles
+    |    |                    ├── MarketDataVerticle.java
+    |    |                    └── RestQuoteAPIVerticle.java
+    |    └── resources
+    |         └── config.json <--- the configuration
+    |         └── jgroups-kubernetes.xml <--- the cluster configuration
 ----
 
 Let's start with the `pom.xml` file. This file specifies the Maven build:
