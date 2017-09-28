@@ -50,8 +50,8 @@
     <dependency>
       <groupId>com.github.cescoffier</groupId>
       <artifactId>vertx-kubernetes-workshop-trader-page</artifactId>
-      <!--<version>d8ac247f62</version>-->
-      <version>0.0.1-SNAPSHOT</version>
+      <!--<version>0.0.1-SNAPSHOT</version>-->
+      <version>a35e4861a9</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -126,6 +126,7 @@
         <configuration>
           <redeploy>true</redeploy>
           <jvmArgs>-Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=vertx-dw</jvmArgs>
+          <runArgs>-cluster</runArgs>
         </configuration>
       </plugin>
       <plugin>

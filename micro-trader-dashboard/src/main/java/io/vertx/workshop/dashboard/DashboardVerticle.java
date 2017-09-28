@@ -70,7 +70,7 @@ public class DashboardVerticle extends AbstractVerticle {
             retrieveAuditService();
             vertx.createHttpServer()
                 .requestHandler(router::accept)
-                .listen(8080);
+                .listen(8082);
         });
 
     }
