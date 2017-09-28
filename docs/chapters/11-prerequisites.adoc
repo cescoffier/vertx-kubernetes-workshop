@@ -4,8 +4,8 @@ We will get to the good stuff, coding all the way soon... But before we start, w
 
 ### Hardware
 
-* Operating System: Mac OS X (10.8+), Windows 7+, Ubuntu 12+, CentOS 7+, Fedora 22+
-* Memory: At least 4 GB+, preferred 8 GB
+* Operating System: Mac OS X (10.8+), Windows 8.1+, Ubuntu 12+, CentOS 7+, Fedora 22+
+* Memory: At least 8 GB+
 
 ### Java Development Kit
 
@@ -39,7 +39,7 @@ access the OpenShift Client (command-line) and console (browser).
 
 ### IDE
 
-We recommend you use an IDE. You can use Eclipse, IntelliJ, or Netbeans.
+We recommend you use an IDE. You can use Eclipse, IntelliJ, VS Code or Netbeans.
 
 #### No IDE ?
 
