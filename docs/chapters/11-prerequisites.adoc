@@ -1,6 +1,6 @@
 ## Prerequisites
 
-We will get to the good stuff, coding all the way soon... But before we start, we need to install a couple of software on our machine.
+We will get to the good stuff, coding all the way soon... But before we start, we need to install some software on our machines.
 
 ### Hardware
 
@@ -12,6 +12,7 @@ We will get to the good stuff, coding all the way soon... But before we start, w
 We need a JDK 8+ installed on our machine. Latest JDK can downloaded from:
 
 * http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html[Oracle JDK 8]
+* http://openjdk.java.net/install/[OpenJDK]
 
 You can use either Oracle JDK or OpenJDK.
 
@@ -27,25 +28,25 @@ You need maven 3.5+.
 Minishift provides a way to run Openshift (and so Kubernetes) on your laptop.
 
 1. Download minishift from https://github.com/minishift/minishift/releases
-2. Follow the instruction from https://docs.openshift.org/latest/minishift/getting-started/installing.html to install
+2. Follow the instructions from https://docs.openshift.org/latest/minishift/getting-started/installing.html to install
  it.
 
-Be aware of the prerequisites in term of hypervisor.
+Be aware of the prerequisites in terms of hypervisors.
 
-At the end of the installation process, you should have the `minishift` executable in your `$PATH`. Then follows the
+At the end of the installation process, you should have the `minishift` executable in your `$PATH`. Then, follow the
 instructions from https://docs.openshift.org/latest/minishift/getting-started/quickstart.html to start minishift and
 access the OpenShift Client (command-line) and console (browser).
 
 ### IDE
 
-We recommend you to use an IDE. You can use Eclipse, IntelliJ or Netbeans.
+We recommend you use an IDE. You can use Eclipse, IntelliJ, or Netbeans.
 
 #### No IDE ?
 
-If you don't have an IDE, here are the step to get started with Eclipse.
+If you don't have an IDE, here are the steps to get started with Eclipse.
 
-1. First download Eclipse from https://www.eclipse.org/downloads/[the download page].
-2. In the _Eclipse Package_ list, select _Eclipse IDE for Java Developers_. It brings you to a download page with a
+1. First download Eclipse from http://www.eclipse.org/downloads/packages/eclipse-ide-java-developers/oxygen1[the download page].
+2. In the _Download Links_ section, be sure to select the right version for your operating system. Once selected it brings you to a download page with a
 `Download` button.
 3. Once downloaded, unzip it.
 4. In the destination directory, you should find an `Eclipse` binary that you can execute.
@@ -85,5 +86,5 @@ cd vertx-kubernetes-workshop
 mvn clean install
 ----
 
-As said previously, Vert.x does not depend on Apache Maven. You can use any build tool (or even no build tool).
+As said previously, Vert.x does not depend on Apache Maven. You can use any build tool (or even no build tool at all).
 
