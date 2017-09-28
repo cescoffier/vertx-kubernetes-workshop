@@ -16,12 +16,13 @@ We need a JDK 8+ installed on our machine. Latest JDK can downloaded from:
 
 You can use either Oracle JDK or OpenJDK.
 
-### Maven
+### Apache Maven
+
+You need Apache Maven 3.5+. If you don't have it already:
 
 * Download Apache Maven from https://maven.apache.org/download.cgi.
 * Unzip to a directory of your choice and add it to the `PATH`.
 
-You need maven 3.5+.
 
 ### Minishift and OpenShift Client
 
