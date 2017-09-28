@@ -18,6 +18,9 @@
 
     <vertx.cluster.name>vertx-cluster</vertx.cluster.name>
     <vertx.console.version>c546f3d</vertx.console.version>
+    <frontend.directory>src/main/frontend</frontend.directory>
+
+    <vertx.health.path>/health</vertx.health.path>
   </properties>
 
   <repositories>
@@ -43,6 +46,12 @@
       <groupId>com.github.yunyu.vertx-console</groupId>
       <artifactId>vertx-console-services</artifactId>
       <version>${vertx.console.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.cescoffier</groupId>
+      <artifactId>vertx-kubernetes-workshop-trader-page</artifactId>
+      <!--<version>d8ac247f62</version>-->
+      <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -114,6 +123,10 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>vertx-maven-plugin</artifactId>
+        <configuration>
+          <redeploy>true</redeploy>
+          <jvmArgs>-Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=vertx-dw</jvmArgs>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>io.fabric8</groupId>
