@@ -44,3 +44,10 @@ We are going to implement critical parts of this application. However, the rest 
 // ----
 ----
 
+
+Just to give a brief overview of the next chapters:
+
+* The quote generator focuses on the basics (project structure, RX2, event bus, HTTP)
+* The portfolio service implements an asynchronous RPC service (async interface, HTTP web client, async coordination)
+* TODO Add other chapters
+
