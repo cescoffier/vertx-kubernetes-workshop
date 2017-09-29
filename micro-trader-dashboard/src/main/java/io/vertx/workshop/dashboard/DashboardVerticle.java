@@ -51,15 +51,15 @@ public class DashboardVerticle extends AbstractVerticle {
         router.get("/health").handler(rc -> rc.response().end("OK"));
 
 
-        MetricRegistry dropwizardRegistry = SharedMetricRegistries.getOrCreate(
-            System.getProperty("vertx.metrics.options.registryName")
-        );
+//        MetricRegistry dropwizardRegistry = SharedMetricRegistries.getOrCreate(
+//            System.getProperty("vertx.metrics.options.registryName")
+//        );
 
         ServiceDiscovery.create(vertx, discovery -> {
             this.discovery = discovery;
             WebConsoleRegistry.create("/admin")
                 // Add pages
-                .addPage(MetricsConsolePage.create(dropwizardRegistry))
+//                .addPage(MetricsConsolePage.create(dropwizardRegistry))
                 .addPage(new TraderPage())
                 .addPage(ServicesConsolePage.create(discovery))
                 .addPage(CircuitBreakersConsolePage.create())

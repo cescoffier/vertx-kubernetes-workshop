@@ -11,8 +11,8 @@ operation, it sends a message on the event bus.
 mvn clean package
 ```
 
-## Run
+## Deployment
 
 ```
-java -jar target/portfolio-service-1.0-SNAPSHOT-fat.jar
+mvn fabric8:deploy
 ```

@@ -3,6 +3,7 @@ package io.vertx.workshop.portfolio.impl;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
@@ -17,6 +18,8 @@ import io.vertx.workshop.portfolio.PortfolioService;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The portfolio service implementation.
@@ -38,7 +41,7 @@ public class PortfolioServiceImpl implements PortfolioService {
         // TODO Call the given handler with a successful Async Result encapsulating the `portfolio` object
         // The async result instance is created using `Future.succeededFuture`
         // ----
-        
+        resultHandler.handle(Future.succeededFuture(portfolio));
         // ----
     }
 
@@ -46,7 +49,12 @@ public class PortfolioServiceImpl implements PortfolioService {
         // TODO Broadcast a JSON message to the `EVENT_ADDRESS` containing the following keys: "action", "quote", "date"
         // (use System.currentTimeMillis()), "amount" and "owned" (newAmount)
         // ----
-
+        vertx.eventBus().publish(EVENT_ADDRESS, new JsonObject()
+            .put("action", action)
+            .put("quote", quote)
+            .put("date", System.currentTimeMillis())
+            .put("amount", amount)
+            .put("owned", newAmount));
         // ----
     }
 
@@ -54,7 +62,14 @@ public class PortfolioServiceImpl implements PortfolioService {
     public void evaluate(Handler<AsyncResult<Double>> resultHandler) {
         // TODO
         // ----
-        
+        Single<WebClient> quotes = HttpEndpoint.rxGetWebClient(discovery, rec -> rec.getName().equals("quotes"));
+        quotes.subscribe((client, err) -> {
+            if (err != null) {
+                resultHandler.handle(Future.failedFuture(err));
+            } else {
+                computeEvaluation(client, resultHandler);
+            }
+        });
         // ---
     }
 
@@ -81,7 +96,14 @@ public class PortfolioServiceImpl implements PortfolioService {
         //TODO
         //----
 
-        return Single.just(0.0);
+        return client.get("/name?" + encode(company))
+            .as(BodyCodec.jsonObject())
+            .rxSend()
+            .map(HttpResponse::body)
+            .map(json -> json.getDouble("bid"))
+            .map(val -> val * numberOfShares);
+
+//        return Single.just(0.0);
         // ---
 
 
