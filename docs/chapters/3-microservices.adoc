@@ -1,6 +1,6 @@
 ## Demystifying microservices
 
-Except you spent the last year in a cave, you probably have heard about _microservices_.
+Unless you spent the last year in a cave, you probably have heard about _microservices_.
 So what are _microservices_? To answer this questions, let's quote from a veteran:
 
 [quote, Martin Fowler, http://martinfowler.com/articles/microservices.html]
@@ -12,15 +12,15 @@ languages and use different data storage technologies.
 
 ### Microservice 101
 
-_Microservice_ is an _architectural style_, which means it is a _specialization of element and relation types, together with
+_Microservices_ is an _architectural style_, which means it is a _specialization of element and relation types, together with
 constraints and how they can be used_ footnote:[This is the definition of _architecture styles_ from the Software
-Engineering Institute.]. I believe by now, I have left you more confused than you before we started.
+Engineering Institute.]. I believe by now, I have left you more confused than you were before we started.
 
 Not to worry. Let's take another approach. Why do we need _microservices_? In one word: **agility**
 footnote:[Ability to move quickly and easily, not related to the Agile methodologies]. Let's imagine, we have
-an  application, rather large. As a large application, the maintenance is a nightmare, adding features take
+a rather large application. As a large application, the maintenance is a nightmare, adding features takes
  too much time, the technology used is very outdated (What? Corba is not cool anymore?), any change needs to pass a
- 50-steps process and be validated by 5 levels of management. Obviously there are several teams on the application with
+ 50-steps process and be validated by 5 levels of management, the list goes on. Obviously there are several teams on the application with
   different requirements and agendas. Well, we have such a _monster app_. How could we make the development and
   maintenance of this application efficient? Microservices are one answer to this question. It aims to reduce the
   _time to production_.
@@ -29,55 +29,55 @@ To do that end, the _microservice_ architectural style proposes to:
 
 1. split the application into a set of decoupled components providing defined `services` (_defined_ means with a
 known interface or API)
-2. allow the components communicate with whatever protocol the choose, often REST, but not necessarily
-3. allow the components use whatever languages and technologies they want
-4. allow each component be developed, released and deployed independently
-5. allow the deployments be _automated_ in their own _pipeline_
-6. allow the orchestration of the whole application be reduced to the barest minimum
+2. allow the components to communicate with whatever protocol they choose, often REST, but not necessarily
+3. allow the components to use whatever languages and technologies they want
+4. allow each component to be developed, released, and deployed independently
+5. allow the deployments to be _automated_ in their own _pipeline_
+6. allow the orchestration of the whole application to be reduced to the bare minimum
 
-In this lab, we won't address point 5, but you should know that Vert.x does not restricts how you deploy
-your components. You can employ whatever technology best suites your environment. whether it is ssh, ansible, puppet, docker, cloud, fabric8, or even floppy disk.
+In this lab, we won't address point 5, but you should know that Vert.x does not restrict how you deploy
+your components. You can employ whatever technology best suites your environment. Whether it is ssh, ansible, puppet, docker, cloud, fabric8, or even floppy disk (your choice of 3.5-inch or 5.25-inch).
 
-Point 6, however, is interesting, and often misunderstood. It's pretty cool to develop independent pieces of software
+Point 6, however, is interesting and often misunderstood. It's pretty cool to develop independent pieces of software
 that magically interact at runtime. Yes, I said _magically_ but in technology we don't believe in magic. To make this happen, what we need is some form of service _discovery_ at runtime. The service discovery mechanism can achieve it's goal with any number of suitable means. These range from: hardcoding the service location in the code (which is generally a bad idea), using a DNS lookup service, or some more advanced techniques.
 
-Having a service discovery mechanism allows our system components interact transparently amongst each other regardless of location or environment. It also allows us to easily load-balance amongst our components through a round robin alogorithm, for example, thereby making our system more fault-tolerant (by locating another service provider when one breaks down).
+Having a service discovery mechanism allows our system components to interact transparently amongst each other regardless of location or environment. It also allows us to easily load-balance amongst our components through a round robin alogorithm, for example, thereby making our system more fault-tolerant (by locating another service provider when one breaks down).
 
-Although by definition, microservice applications are not required to be distributed, there usually are in practice. This comes with all the distributed application benefits and constraints: consensus computation (FLP), CAP theorem, consistency, monitoring, and many other reasons to fail. So microservices applications need to be designed to accommodate failures from their early implementation stage.
+Although by definition, microservice applications are not required to be distributed, they usually are in practice. This comes with all the distributed application benefits and constraints: consensus computation (FLP), CAP theorem, consistency, monitoring, and many other reasons to fail. So microservices applications need to be designed to accommodate failures from their early implementation stage.
 
 Before we go further, there are a couple of points I would like to mention. _Microservices_ are **not** new and the concept is not rocket science. Academic papers from the 70's and 80's have defined (using different words) architectural styles very
-  close to this. Also very important point to understand is: microservices are not a silver bullet. (Unless well managed) it has the capacity to increase the complexity of your application due to its distributed nature. Lastly, a microservice architecture will not fix all your issues.
+  close to this. Another very important point to understand is: microservices are not a silver bullet. (Unless well managed) they have the capacity to increase the complexity of your application due to their distributed nature. Lastly, a microservice architecture will not fix all your issues.
 
-The major concerns when it comes microservices are rapid delivery, adaptation, independence and replaceability. Every microservice is made to be replaceable by another providing the same _service / API / interface_ (at the core, it's basically an application of the https://en.wikipedia.org/wiki/Liskov_substitution_principle[Liskov substitution principle]).
+The major concerns when it comes to microservices are rapid delivery, adaptation, independence and replaceability. Every microservice is made to be replaceable by another providing the same _service / API / interface_ (at the core, it's basically an application of the https://en.wikipedia.org/wiki/Liskov_substitution_principle[Liskov substitution principle]).
 
-If you have been a developer for about 10 years, you might want to ask what difference is between microservices and SOA. For a lot of people it's about size. This is not always true because services don't necessarily have to be small which makes the term "microservice" quite misleading. Microservices and SOA differ purpose but the basic concepts are similar:
+If you have been a developer for the last 10 years, you might want to ask what's the difference between microservices and SOA. For a lot of people it's about size. This is not always true because services don't necessarily have to be small which makes the term "microservice" quite misleading. Microservices and SOA differ in purpose but the basic concepts are similar:
 
-* service : a defined feature accessible by an API, a client, a proxy, anything
+* service: a defined feature accessible by an API, a client, a proxy, anything
 * service provider: a component implementing a service
 * service consumer: a component consuming a service
 * service discovery: the mechanism used by a consumer to find a provider
 
-Both approaches inherit from the _service oriented computing_, aiming to decompose and manage independent pieces of
-software. You may have never heard about this even if you used it: COM, Corba, Jini, OSGi, and web services are all
+Both approaches inherit from _service oriented computing_, aiming to decompose and manage independent pieces of
+software. You may have never heard about this even if you have used it: COM, Corba, Jini, OSGi, and web services are all
 different implementations of _service oriented computing_.
 
-Finally, there is a common misconception that microservices must be RESTful by nature. This can't be farther from the truth. Microservices can employ any number interaction style that best fit their purpose: RPC, events, messages, streams etc. In this lab we will using RESTful services, async RPC, and message sources.
+Finally, there is a common misconception that microservices must be RESTful by nature. This couldn't be further from the truth. Microservices can employ any number interaction styles that best fit their purpose: RPC, events, messages, streams etc. In this lab we will be using RESTful services, async RPC, and message sources.
 
-It tends to not be easy to use service discovery when we are not used to. So, let's do a few exercises about it. To continue introducing
-Rx Java constructs, these exercises use the RX Java 2 API offered by vert.x
+It tends to not be easy to use service discovery when we are not used to it. So, let's do a few exercises about it. To continue introducing
+Rx Java constructs, these exercises use the RX Java 2 API offered by Vert.x
 
 ### Exercise 1 - Publishing a service
 
 In this first exercise, we are just going to publish a service. A service is described by a `record` containing
 enough metadata for a consumer to select the right service and create a _client_.
 
-Open the `io.vertx.workshop.exercise.microservice.Exercise1Verticle` class from the `microservices-exercises` project
-. This class already contains some code to create an HTTP endpoint using Vert.x Web, exposed on the port 8080.
+Open the `microservices-exercises/src/main/java/io/vertx/workshop/exercise/microservice/Exercise1Verticle.java` file. 
+This class already contains some code to create an HTTP endpoint using Vert.x Web, exposed on the port 8080.
 Once ready to serve, and to let the other parts of your system consume this service, we need to advertise it. This is
-achieve in the `publish` method that you need to write.
+achieved in the `publish` method that you need to write.
 
 First you need to create a `record` for the service. The `io.vertx.reactivex.servicediscovery.types.HttpEndpoint`
-class contains methods to create `records` for HTTP endpoint. Once you have the record, you call `rxPublish` on the
+class contains methods to create `records` for an HTTP endpoint. Once you have the record, you call `rxPublish` on the
 Vert.x service discovery. This stores the record and let the other parts of your system be aware of its availability.
 
 [.assignment]
@@ -86,7 +86,7 @@ Vert.x service discovery. This stores the record and let the other parts of your
 ----
 private Single<Record> publish(HttpServer server) {
     // 1 - Create a service record using `io.vertx.reactivex.servicediscovery.types.HttpEndpoint.createRecord`.
-    // This record define the service name ("greetings"), the host ("localhost"), the server port and the root ("/")
+    // This record defines the service name ("greetings"), the host ("localhost"), the server port and the root ("/")
     Record record = HttpEndpoint.createRecord("greetings", "localhost", server.actualPort(), "/");
 
     // 2 - Call the rxPublish method with the created record and return the resulting single
@@ -96,26 +96,26 @@ private Single<Record> publish(HttpServer server) {
 ****
 
 Notice also the `stop` method from the verticle class. When the verticle is stopped we must unregister the service.
-For this, the published record is stored and use in the `rxUnpublish` method. As this operation is also asynchronous,
- the `stop` method use a `Future` to indicate the completion of the method.
+For this, the published record is stored and used in the `rxUnpublish` method. As this operation is also asynchronous,
+ the `stop` method uses a `Future` to indicate the completion of the method.
 
 ### Exercise 2 - Consuming a service using service references
 
 The previous exercise has published a service. Vert.x provides two ways to retrieve this service:
 
-* a low level API where the consumer retrieve the `record` (service description), then retrieve a `reference` (service
-binding), and finally get the _client_ (service object)
+* a low level API where the consumer retrieves the `record` (service description), retrieves a `reference` (service
+binding), and finally gets the _client_ (service object)
 * a higher-level API managing the record and reference parts transparently.
 
-In this exercise we use the first approach to better understand the different concepts. Open the `io.vertx.workshop.exercise.microservice.Exercise2Verticle` class, and follow the instructions to retrieve the service.
+In this exercise we use the first approach to better understand the different concepts. Open the `microservices-exercises/src/main/java/io/vertx/workshop/exercise/microservice/Exercise2Verticle.java` file, and follow the instructions to retrieve the service.
 
 TIP: `map` vs. `flatMap` - This code uses `map` and `flatMap`. `map` is used when the operation is synchronous and
-return a non-reactive type. `flatMap` is used when the result is a reactive type (`Single`, `Maybe`, `Completable`,
-`Observable` or `Flowable`). The result denotes an asynchronous operation completed "later". When this operation
+returns a non-reactive type. `flatMap` is used when the result is a reactive type (`Single`, `Maybe`, `Completable`,
+`Observable`, or `Flowable`). The result denotes an asynchronous operation completed "later". When this operation
 progresses or completes, the next processing stage is executed.
 
-TIP: the `WebClient` is an asynchronous Vert.x HTTP client. To use it, create ` _request_ using the `get` (or one of
-the other proposed method), indicating the path. Then call `rxSend` to create the `Single` (a reactive type with a
+TIP: the `WebClient` is an asynchronous Vert.x HTTP client. To use it, create a ` _request_ using `get` (or one of
+the other proposed methods), indicating the path. Then call `rxSend` to create a `Single` (reactive type with a
 _single_ result resolved "later"). Once you get the `HttpResponse` you can use the `bodyAsString` method to get the
 payload.
 
@@ -141,7 +141,7 @@ discovery.rxGetRecord(svc -> svc.getName().equals("greetings"))
 
 ### Exercise 3 - Consuming a service using sugars
 
-This exercise is equivalent to the previous one, but use the higher-level API. Use the method `io.vertx.reactivex.servicediscovery.types.HttpEndpoint#rxGetWebClient` to retrieve a `WebClient` directly.
+This exercise is equivalent to the previous one but uses the higher-level API. Use the method `io.vertx.reactivex.servicediscovery.types.HttpEndpoint#rxGetWebClient` to retrieve a `WebClient` directly.
 
 [.assignment]
 ****
@@ -163,7 +163,7 @@ HttpEndpoint.rxGetWebClient(discovery, svc -> svc.getName().equals("greetings"))
 ### Time to go further
 
 Microservices are a great way to improve the _agility_ of your product. But, it introduces a lot of moving parts, and
- keeping everything on track is not a simple task. Service discovery let the different parts discovery themselves and
+ keeping everything on track is not a simple task. Service discovery lets the different parts discover one another and
   interact, but what about deployment, monitoring, and other administration tasks? For these, we will look into
   containers and Kubernetes in the next chapter.
 
