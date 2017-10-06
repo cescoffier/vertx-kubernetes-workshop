@@ -141,3 +141,6 @@ hs_err_pid*
 
 # Asciidctor plugin
 .asciidoctor
+docs/chapters/async-rpc-sequence.png
+docs/chapters/portfolio-sequence.png
+docs/chapters/rpc-sequence.png
