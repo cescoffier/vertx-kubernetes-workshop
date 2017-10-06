@@ -1,13 +1,14 @@
 ## The compulsive traders
 
 In the `portfolio` project we have implemented an event bus service to manage our portfolio. In the quote-generator
-we send quotes on the event bus. Traders are components that consumes these two services with only one goal: getting
+we send quotes on the event bus. Traders are components that consume these two services with only one goal: getting
 rich (or not...)!
 
-In this section, we are going to develop 2 traders (following a stupid logic you can definitely improve):
+In this section, we are going to develop 3 traders (following a stupid logic you can definitely improve):
 
-* the first trader is developed in Java
-* the second trader is developed in Groovy
+* the first trader is developer with RX Java 2
+* the second trader is developed with Kotlin
+* the third trader is developed in Scala
 
 ### Compulsive and dumb traders
 
