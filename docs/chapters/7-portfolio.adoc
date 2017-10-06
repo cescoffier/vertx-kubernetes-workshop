@@ -14,10 +14,10 @@ File referenced in this chapter are located into the `portfolio-service` project
 
 ### RPC and Async RPC
 
-Microservices are not only about HTTP or REST. They can be exposed using any types of interactions, and _Remote
-Procedure Calls_ is one of them. With RPC, a component can effectively send a request to another component by doing a
- local procedure call, which results in the request being packaged in a message and sent to the callee. Likewise, the
-  result is sent back and returned to the caller component as the result of the procedure call:
+Microservices are not only about REST. They can be exposed using any types of interactions, _Remote Procedure Calls_ (RPC)
+being one of them. With RPC, a component can effectively send a request to another component by doing a local procedure
+call, which results in the request being packaged in a message and sent to the callee. Likewise, the result is sent back
+ and returned to the caller component as the result of the procedure call:
 
 [plantuml, rpc-sequence, png]
 ----
@@ -36,11 +36,11 @@ Proxy -> Bob : "hello Bob"
 @enduml
 ----
 
-Such interactions has the advantages to introduce typing, and so is less error-prone than unstructured messages. However, it also
+Such interactions have the advantage of introducing typing, and so are less error-prone than unstructured messages. However, it also
  introduces a tighter coupling between the caller and the callee. The caller knows how to call the callee:
 
-1. how the service is called
-2. where the service is living (location)
+1. How the service is called
+2. Where the service is living (location)
 
 Traditional RPC exhibits an annoying drawback: the caller waits until the response has been received. This is
 definitely a blocking call, as it involves at least two network messages. In addition, it is not really designed for
@@ -74,11 +74,11 @@ instead of _waiting_ for the response, the result is passed asynchronous.
 The `AsyncResult` notifies the `Handler` whether the invocation succeeded or failed. Upon success, the handler can
  retrieve the result.
 
-Such async-RPC has several advantages:
+Using async-RPC has several advantages:
 
-* the caller is not blocked
-* it deals with failures
-* it avoids you to send messages on the event bus and manages object marshalling and unmarshalling for you.
+* The caller is not blocked
+* It deals with failures
+* It avoids sending messages on the event bus and manages object marshalling and unmarshalling for you.
 
 ### Async service interface
 
@@ -109,14 +109,14 @@ service proxy generation.
 
 The `Portfolio` object is a data object. Event bus proxies support a limited set of types, and for non-supported types,
 it must use _data objects_ (please check the http://vertx.io/docs/vertx-service-proxy/java/[documentation] for the whole list
- of supported types). Data objects are Java classes obeying to a set of constraints:
+ of supported types). Data objects are Java classes obeying a set of constraints:
 
 * It must be annotated with `DataObject`
 * It must have an empty constructor, a copy constructor and a constructor taking a `JsonObject` as parameter
 * It must have a `toJson` method building a `JsonObject` representing the current object
-* Fields must be _property_ with getters and setters
+* Each field must be _property_ with (getters and setters)
 
-Let's open the `io.vertx.workshop.portfolio.Portfolio` class to see how it looks like. As you can see, all the JSON
+Let's open the `io.vertx.workshop.portfolio.Portfolio` class to see what it looks like. As you can see, all the JSON
 handling is managed by `converters` that are automatically generated, so a data object is very close to a simple _bean_.
 
 === Implementing the service
@@ -130,13 +130,13 @@ methods in this service:
 
 ==== Task - Creating AsyncResult instances
 
-As we have seen above, our async service have `Handler<AsyncResult<Portfolio>>` parameter. So when we implement this
-service, we would need to call the `Handler` with an instance of `AsyncResult`. To see how this works, let's
-implement the `getPortfolio` method:
+As we have seen above, our async service has a `Handler<AsyncResult<Portfolio>>` parameter. So when we implement this
+service, we need to call the `Handler` with an instance of `AsyncResult`. To see how this works, let's
+implement the `getPortfolio` method.
 
-In `io.vertx.workshop.portfolio.impl.PortfolioServiceImpl`, fill the `getPortfolio` method. It should call the
+In `io.vertx.workshop.portfolio.impl.PortfolioServiceImpl`, fill in the `getPortfolio` method. It should call the
 `handle` method of the `resultHandler` with a _successful_ async result. This object can be created from the (Vert.x)
-`Future` method.
+`Future` class.
 
 ****
 [.assignment]
@@ -145,17 +145,17 @@ In `io.vertx.workshop.portfolio.impl.PortfolioServiceImpl`, fill the `getPortfol
 resultHandler.handle(Future.succeededFuture(portfolio));
 ----
 
-Wow... one single line ? Let's dissect it:
+Wow ... one single line? Let's dissect it:
 
-* `resultHandler.handle` : this is to invoke the `Handler`. `Handler<X>` has a single method (`handle(X)`).
-* `Future.succeededFuture` : this is how we create an instance of `AsyncResult` denoting a success. The passed value
+* `resultHandler.handle`: this invokes the `Handler`. `Handler<X>` has a single method (`handle(X)`).
+* `Future.succeededFuture`: this is how we create an instance of `AsyncResult` denoting a success. The passed value
  is the result (`portfolio`)
 ****
 
-But, wait, what is the relationship between `AsyncResult` and `Future` ? A `Future` represents the result of an action
+But, wait, what is the relationship between `AsyncResult` and `Future`? A `Future` represents the result of an action
 that may, or may not, have occurred yet. The result may be `null` if the `Future` is used to detect the completion of
  an operation. The operation behind a `Future` object may succeed or fail. `AsyncResult` is a structure describing the
-  success of the failure of an operation. So, `Future` are `AsyncResult`. In Vert.x `AsyncResult` instances are
+  success or the failure of an operation. So, a `Future` is an `AsyncResult`. In Vert.x `AsyncResult` instances are
   created from the `Future` class.
 
 `AsyncResult` describes:
@@ -163,7 +163,7 @@ that may, or may not, have occurred yet. The result may be `null` if the `Future
 * a success as shown before, it encapsulates the result
 * a failure, it encapsulates a `Throwable` instance
 
-NOTE: Did you know that the term `Future` has been introduced in 1977, `Promise` in 1976... Not really new things.
+NOTE: Did you know that the term `Future` was introduced in 1977, `Promise` in 1976 ... Not really new things.
 
 So, how does this work with our async RPC service, let's look at this sequence diagram:
 
@@ -187,22 +187,23 @@ So, how does this work with our async RPC service, let's look at this sequence d
  @enduml
 ----
 
-==== Task - Sending event on the event bus
+==== Task - Sending an event on the event bus
 
-In the previous chapter, we have registered a consumer receiving event bus messages, it's time to see how to send
+In the previous chapter, we registered a consumer receiving event bus messages, it's time to see how to send
 messages on the event bus. You access the event bus using `vertx.eventBus()`. From this object you can:
 
-* `send` : send a message in point to point mode
-* `publish` : broadcast a message to all consumers registered on the address
-* `send` with a `Handler<AsyncResult<Message>>>`: send a message in point to point mode and expect a reply. If you
-use RX Java, this method is called `rxSend` and returns a `Single<Message>`.
+* `send`: send a message in point to point mode
+* `publish`: broadcast a message to all consumers registered on the address
+* `send` with a `Handler<AsyncResult<Message>>`: send a message in point to point mode and expect a reply. If you
+use RX Java, this method is called `rxSend` and returns a `Single<Message>`. If the receiver does not reply to the
+message, it is considered a failure (timeout)
 
 Ok, back to our code. We have provided the `buy` and `sell` methods, that are just doing some checks before buying or
  selling shares. Once the action is _emitted_, we send a message on the event bus that will be consumed by the `Audit
   Service` and the `Dashboard`. So, we are going to use the `publish` method.
 
 Write the body of the `sendActionOnTheEventBus` method in order to broadcast (publish) a message on the `EVENT_ADDRESS`
- address containing a `JsonObject` as body. This object must contains the following entries:
+ address containing a `JsonObject` as the body. This object must contain the following entries:
 
 * action -> the action (buy or sell)
 * quote -> the quote as Json
@@ -224,27 +225,27 @@ vertx.eventBus().publish(EVENT_ADDRESS, new JsonObject()
 
 Let's have a deeper look:
 
-1. it gets the `EventBus` instance and call `publish` on it. The first parameter is the _address_ on which the
+1. It gets the `EventBus` instance and calls `publish` on it. The first parameter is the _address_ on which the
 message is sent
-2. the body is a `JsonObject` containing the different information on the action (buy or sell, the quote (another
-json object), the date...
+2. The body is a `JsonObject` containing the different information on the action (buy or sell, the quote (another
+json object), the date ...)
 ****
 
 ==== Task - Coordinating async methods and consuming HTTP endpoints - Portfolio value evaluation
 
 The last method to implement is the `evaluate` method. This method computes the current value of the portfolio.
 However, for this it needs to access the "current" value of the stock (so the last quote). It is going to consume
-the HTTP endpoint we have implemented in the quote generator. For this, we are going to:
+the HTTP endpoint we implemented in the quote generator. For this, we are going to:
 
-* discover the service
-* call the service for each company we own shares
-* when all calls are done, compute the value and send it back to the caller
+* Discover the service
+* Call the service for each company in which we own shares
+* When all calls are done, compute the value and send it back to the caller
 
-That's a bit more tricky, so let's do it step by step using RX Java 2. First, in the `evaluate`, we need to retrieve
-the HTTP endpoint (service) provided by the quote generator. This service is named `quotes`. We published in in the
-previous section. So, let's start to get this service.
+That's a bit more tricky, so let's do it step by step using RX Java 2. First, in the `evaluate` method, we need to
+retrieve the HTTP endpoint (service) provided by the quote generator. This service is named `quotes`. We published it
+ in in the previous section. So, let's start by getting this service.
 
-Fill the `evaluate` method to retrieve the `quotes` service. You can retrieve Http services using `HttpEndpoint
+Fill in the `evaluate` method to retrieve the `quotes` service. You can retrieve Http services using `HttpEndpoint
 .rxGetWebClient`. Pass a lambda as selecting the "quotes" service (`svc -> svc.getName().equals("quotes"). The
 `rxGetWebClient` method returns a `Single` (a stream of one item). As it's a stream we **must** subscribe on it (or
 nothing will happen). In the `subscribe((client, error) -> { ...})`, check whether the `error` is not `null`. If not,
@@ -275,7 +276,7 @@ Here is how the `computeEvaluation` method is implemented:
 
 [source, java]
 ----
-// We need to call the service for each company we own shares
+// We need to call the service for each company in which we own shares
 Flowable.fromIterable(portfolio.getShares().entrySet())
     // For each, we retrieve the value
     .flatMapSingle(entry -> getValueForCompany(webClient, entry.getKey(), entry.getValue()))
@@ -294,7 +295,7 @@ Flowable.fromIterable(portfolio.getShares().entrySet())
 ----
 
 Now, we just need the `getValueForCompany` method that call the service. This method returns a `Single<Double>`
-emitting the (numberOfShares * bid). Write the content of this method following these steps:
+emitting the `numberOfShares * bid` result. Write the content of this method following these steps:
 
 1. use the `client.get("/?name=" + encode(company))` to create a HTTP request
 2. we expect a JSON object as response payload, so use `.as(BodyCodec.jsonObject())`
@@ -325,21 +326,21 @@ private Single<Double> getValueForCompany(WebClient client, String company, int 
 
 === Run time !
 
-To deploy the project launch:
+To build the project from a terminal session:
 
 ----
 cd portfolio-service
 mvn fabric8:deploy
 ----
 
-Here you go, the portfolio service is started. It discovers the `quotes` service and is ready to be used.
+There you go, the portfolio service is started. It discovers the `quotes` service and is ready to be used.
 
-Go back to the dashboard, and you should see some new services and the _cash_ should have been set in the top left
+Go back to the dashboard, and you should see some new services and _cash_ should have been set in the top left
 corner.
 
 NOTE: The dashboard is consuming the portfolio service using the async RPC mechanism. A client for JavaScript is
-generated at compile time, and use SockJS to communicate. Behind the hood there is a bridge between the event bus and
+generated at compile time, and use SockJS to communicate. Under the hood there is a bridge between the event bus and
  SockJS.
 
-Well, it's time to buy and sell some shares no ? Let's do that in the next chapter.
+Well, it's time to buy and sell some shares, no? Let's do that in the next chapter.
 

@@ -74,7 +74,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     private void computeEvaluation(WebClient webClient, Handler<AsyncResult<Double>> resultHandler) {
-        // We need to call the service for each company we own shares
+        // We need to call the service for each company in which we own shares
         Flowable.fromIterable(portfolio.getShares().entrySet())
             // For each, we retrieve the value
             .flatMapSingle(entry -> getValueForCompany(webClient, entry.getKey(), entry.getValue()))
