@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>io.vertx.workshop</groupId>
-        <artifactId>vertx-microservice-workshop</artifactId>
+        <artifactId>vertx-kubernetes-workshop</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
