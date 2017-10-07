@@ -59,14 +59,15 @@ public class TraderUtils {
     public static Completable dumbTradingLogic(String company, int numberOfShares, io.vertx.workshop.portfolio.reactivex.PortfolioService portfolio, JsonObject quote) {
         if (quote.getString("name").equals(company)) {
             if (TraderUtils.timeToSell()) {
-
+                System.out.println("Trying to sell " + numberOfShares + " " + company);
                 return portfolio.rxSell(numberOfShares, quote)
                     .doOnSuccess(p -> System.out.println("Sold " + numberOfShares + " of " + company + "!"))
                     .doOnError(e -> System.out.println("D'oh, failed to sell " + numberOfShares + " of "
                         + company + ": " + e.getMessage()))
                     .toCompletable();
             } else {
-                return portfolio.rxSell(numberOfShares, quote)
+                System.out.println("Trying to buy " + numberOfShares + " " + company);
+                return portfolio.rxBuy(numberOfShares, quote)
                     .doOnSuccess(p -> System.out.println("Bought " + numberOfShares + " of " + company + " !"))
                     .doOnError(e -> System.out.println("D'oh, failed to buy " + numberOfShares + " of " + company + " : " + e
                         .getMessage()))

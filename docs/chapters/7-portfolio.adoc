@@ -330,6 +330,7 @@ To build the project from a terminal session:
 
 ----
 cd portfolio-service
+mvn clean install
 mvn fabric8:deploy
 ----
 
