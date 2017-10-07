@@ -57,6 +57,23 @@
   <build>
     <plugins>
       <plugin>
+        <artifactId>kotlin-maven-plugin</artifactId>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <version>1.1.51</version>
+        <executions>
+          <execution>
+            <configuration>
+              <sourceDirs>
+                <sourceDir>${basedir}/src/main/kotlin</sourceDir>
+              </sourceDirs>
+            </configuration>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.bsc.maven</groupId>
         <artifactId>maven-processor-plugin</artifactId>
         <version>3.2.0</version>
@@ -110,6 +127,28 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>fabric8-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.0.2</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>client</classifier>
+              <includes>
+                <include>io/vertx/workshop/portfolio/*</include>
+                <include>io/vertx/workshop/portfolio/reactivex/*</include>
+                <include>io/vertx/workshop/portfolio/kotlin/*</include>
+                <include>vertx-workshop-portfolio-js/*</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       
     </plugins>
