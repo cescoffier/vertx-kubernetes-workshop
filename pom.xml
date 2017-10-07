@@ -58,11 +58,6 @@
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-lang-scala_2.12</artifactId>
-      <version>${vertx.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
       <artifactId>vertx-lang-kotlin</artifactId>
     </dependency>
     <dependency>
