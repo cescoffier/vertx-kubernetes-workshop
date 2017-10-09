@@ -1,5 +1,6 @@
 package io.vertx.workshop.trader.impl;
 
+import io.vertx.core.*;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
