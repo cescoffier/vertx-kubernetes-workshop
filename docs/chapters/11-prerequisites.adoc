@@ -1,13 +1,13 @@
-## Prerequisites
+== Prerequisites
 
 We will get to the good stuff, coding all the way soon... But before we start, we need to install some software on our machines.
 
-### Hardware
+=== Hardware
 
 * Operating System: Mac OS X (10.8+), Windows 8.1+, Ubuntu 12+, CentOS 7+, Fedora 22+
 * Memory: At least 8 GB+
 
-### Java Development Kit
+=== Java Development Kit
 
 We need a JDK 8+ installed on our machine. Latest JDK can downloaded from:
 
@@ -16,7 +16,7 @@ We need a JDK 8+ installed on our machine. Latest JDK can downloaded from:
 
 You can use either Oracle JDK or OpenJDK.
 
-### Apache Maven
+=== Apache Maven
 
 You need Apache Maven 3.5+. If you don't have it already:
 
@@ -24,7 +24,7 @@ You need Apache Maven 3.5+. If you don't have it already:
 * Unzip to a directory of your choice and add it to the `PATH`.
 
 
-### Minishift and OpenShift Client
+=== Minishift and OpenShift Client
 
 Minishift provides a way to run Openshift (and so Kubernetes) on your laptop.
 
@@ -38,11 +38,11 @@ At the end of the installation process, you should have the `minishift` executab
 instructions from https://docs.openshift.org/latest/minishift/getting-started/quickstart.html to start minishift and
 access the OpenShift Client (command-line) and console (browser).
 
-### IDE
+=== IDE
 
 We recommend you use an IDE. You can use Eclipse, IntelliJ, VS Code or Netbeans.
 
-#### No IDE ?
+==== No IDE ?
 
 If you don't have an IDE, here are the steps to get started with Eclipse.
 
@@ -54,7 +54,7 @@ If you don't have an IDE, here are the steps to get started with Eclipse.
 5. Eclipse asks you to create a workspace.
 6. Once launched, click on the _Workbench_ arrow (top right corner).
 
-### Getting the code
+=== Getting the code
 
 [source]
 ----
@@ -77,7 +77,7 @@ directories as _source root_ by default. Right-click on `portfolio-service/src/m
 
 TIP: A complete solution is given in the `solution` directory.
 
-### Build
+=== Build
 
 The build is managed using Apache Maven. Compile everything using:
 

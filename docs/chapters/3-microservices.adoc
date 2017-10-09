@@ -1,4 +1,4 @@
-## Demystifying microservices
+== Demystifying microservices
 
 Unless you spent the last year in a cave, you probably have heard about _microservices_.
 So what are _microservices_? To answer this questions, let's quote from a veteran:
@@ -10,7 +10,7 @@ services are built around business capabilities and independently deployable by 
 There is a bare minimum of centralized management of these services, which may be written in different programming
 languages and use different data storage technologies.
 
-### Microservice 101
+=== Microservice 101
 
 _Microservices_ is an _architectural style_, which means it is a _specialization of element and relation types, together with
 constraints and how they can be used_ footnote:[This is the definition of _architecture styles_ from the Software
@@ -66,7 +66,7 @@ Finally, there is a common misconception that microservices must be RESTful by n
 It tends to not be easy to use service discovery when we are not used to it. So, let's do a few exercises about it. To continue introducing
 Rx Java constructs, these exercises use the RX Java 2 API offered by Vert.x
 
-### Exercise 1 - Publishing a service
+=== Exercise 1 - Publishing a service
 
 In this first exercise, we are just going to publish a service. A service is described by a `record` containing
 enough metadata for a consumer to select the right service and create a _client_.
@@ -99,7 +99,7 @@ Notice also the `stop` method from the verticle class. When the verticle is stop
 For this, the published record is stored and used in the `rxUnpublish` method. As this operation is also asynchronous,
  the `stop` method uses a `Future` to indicate the completion of the method.
 
-### Exercise 2 - Consuming a service using service references
+=== Exercise 2 - Consuming a service using service references
 
 The previous exercise has published a service. Vert.x provides two ways to retrieve this service:
 
@@ -139,7 +139,7 @@ discovery.rxGetRecord(svc -> svc.getName().equals("greetings"))
 ----
 ****
 
-### Exercise 3 - Consuming a service using sugars
+=== Exercise 3 - Consuming a service using sugars
 
 This exercise is equivalent to the previous one but uses the higher-level API. Use the method `io.vertx.reactivex.servicediscovery.types.HttpEndpoint#rxGetWebClient` to retrieve a `WebClient` directly.
 
@@ -160,7 +160,7 @@ HttpEndpoint.rxGetWebClient(discovery, svc -> svc.getName().equals("greetings"))
 ----
 ****
 
-### Time to go further
+=== Time to go further
 
 Microservices are a great way to improve the _agility_ of your product. But, it introduces a lot of moving parts, and
  keeping everything on track is not a simple task. Service discovery lets the different parts discover one another and

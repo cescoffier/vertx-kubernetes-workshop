@@ -1,0 +1,170 @@
+== The compulsive traders
+
+Let's rewind a bit to have a better view of the current status. In the quote-generator we have build a verticle
+sending market data to the event bus. In the portfolio service, we expose an event bus service to manage our
+portfolio. Traders are the missing link between both. It implement the logic deciding when to buy and sell stocks.
+Traders have only one goal: getting rich (or not...)!
+
+In this section, we are going to develop 3 traders (following a stupid logic you can definitely improve):
+
+* The first trader is developed with the _raw_ Vert.x API (callbacks)
+* The second trader is developer with RX Java 2 (reactive programming)
+* The third trader is developed with Kotlin using co-routine
+
+It gives you an overview of the different programming style proposed by Vert.x, and let you decide which one you
+prefer. Also notice that Vert.x supports JavaScript, Groovy, Ruby, Scala and Ceylon.
+
+The code written in this chapter is located into the `compulsive-traders` project.
+
+=== Compulsive and dumb traders
+
+Before seeing how these are implemented, let's explain the absolutely illogic algorithm used by these traders:
+
+1. A compulsive trader is _choosing_ one company name and a number of shares (`x`)
+2. Randomly, it tries to buy or sell `x` shares of the company
+
+It does not check whether or not it has enough shares or money, it just tries... This logic is implemented in
+`io.vertx.workshop.trader.impl.TraderUtils`.
+
+=== Task - The callback-based trader
+
+Let's start with the _callback_ trader. This trader is developed using the _raw_ Vert.x API and so callbacks. But
+wait... who wants to write callback-hell code? To ease the readability of the code, we are going to use Vert.x
+`Future`. A `Future` is a structure encapsulating a deferred result (or failure). Unlike regular Java `Future`, Vert
+.x `Futures` are non-blocking (no `get` and `join` methods). You needs to _listen_ for the `Future` completion by
+attaching a `Handler` indicating the result (success or failure). `Futures` provide a nice and simple way to
+structure your code, but that's not all. It also provides _high-level_ operators such as `CompositeFuture.all`
+indicating the completion of a set of `Futures`.
+
+`Future` objects are created using `Future.future()`. To be notified of the completion, you need to attach a
+`Handler<AsyncResult>>` using the `Future.setHandler` method.
+
+Open the `io.vertx.workshop.trader.impl.CallbackTraderVerticle` class and fill in the code to complete TODOs _1,2 and
+ 3_.
+
+The trader needs the `Portfolio` service and the `market` service (the message source sending the market data). We
+cannot start the trading logic before having retrieved both of them. Use a `CompositeFuture` to be notified when both
+ are completed (or one fails). A `CompositeFuture` is a `Future`, so attach a `Handler` to it that call the
+ `initialize` method.
+
+[.assignment]
+****
+[source, java]
+----
+@Override
+public void start(Future<Void> done) throws Exception {
+
+    String company = TraderUtils.pickACompany();
+    int numberOfShares = TraderUtils.pickANumber();
+    System.out.println("Java-Callback compulsive trader configured for company " + company + " and shares: " +
+        numberOfShares);
+
+    // TODO Complete the code to apply the trading _logic_ on each message received from the "market-data" message
+    // source
+    // ----
+
+    // Retrieve service discovery
+    Future<ServiceDiscovery> retrieveServiceDiscovery = getServiceDiscovery(vertx);
+
+    // When the service discovery is retrieved, retrieve the portfolio service and market data
+    retrieveServiceDiscovery.setHandler(discovery -> {
+
+        // TODO 1 - Get the Future objects for the portfolio and market services. Just use the method given below
+        Future<PortfolioService> retrieveThePortfolioService = getPortfolioService(discovery.result());
+        Future<MessageConsumer<JsonObject>> retrieveTheMarket = getMarketSource(discovery.result());
+
+        // TODO 2 - Use CompositeFuture.all to "wait" until both future are completed.
+        // TODO 3 - Attach a handler on the composite future, and call "initialize"
+        // When both are completed, register the message handler to execute the trading logic
+        CompositeFuture.all(retrieveServiceDiscovery, retrieveTheMarket)
+            .setHandler(x ->
+                initialize(done, company, numberOfShares, retrieveThePortfolioService, retrieveTheMarket, x));
+    });
+    // ----
+
+}
+----
+****
+
+Once done, you can already run this trader using:
+
+[source]
+----
+cd compulsive-traders
+mvn fabric8:deploy
+----
+
+Wan't to run the completed code, append the `-Psolution` to the Maven command.
+
+If you go back to the dashboard, you may start seen some moves on your portfolio.
+
+=== Task - The RX Java 2 trader
+
+In this task, we re-implement the very same logic but using a different programming style. We are going to use Rx
+Java 2. Open the `io.vertx.workshop.trader.impl.RXCompulsiveTraderVerticle` class. Complete the code following the
+_TODO_ items. Use the `zip` operator to combine the two `Singles`. When both are completed, attach the message
+handler to the `MessageConsumer` and execute the trading logic on each received event. Don't forget the subscription
+part(s).
+
+[.assignment]
+****
+[source, java]
+----
+@Override
+public void start(Future<Void> done) {
+    String company = TraderUtils.pickACompany();
+    int numberOfShares = TraderUtils.pickANumber();
+    System.out.println("Java-RX compulsive trader configured for company " + company + " and shares: " +
+        numberOfShares);
+
+    ServiceDiscovery.create(vertx, discovery -> {
+        Single<PortfolioService> retrieveThePortfolioService = RXEventBusService.rxGetProxy(discovery, PortfolioService.class,
+            rec -> rec.getName().equalsIgnoreCase("portfolio"));
+
+        Single<MessageConsumer<JsonObject>> retrieveTheMarket = MessageSource.rxGetConsumer(discovery,
+            rec -> rec.getName().equalsIgnoreCase("market-data"));
+
+        //TODO
+        //----
+
+        // TODO 1 - "wait" for both single to be completed (using Single.zip or Single.zipWith methods)
+        retrieveThePortfolioService.zipWith(retrieveTheMarket, (ps, consumer) -> {
+
+        // TODO 2 - When both single have completed, attach the handler to the message consumer to execute the
+            // trading logic
+
+
+        // TODO 3 - Use the TraderUtils.drumpTradingLogic method returning a Completable. Don't forget to
+            // subscribe to it, or nothing will happen
+
+            consumer.handler(message ->
+                TraderUtils.dumbTradingLogic(company, numberOfShares, ps, message.body()).subscribe());
+            // We need to return something as requested by the "zip" signature.
+            return true;
+        })
+
+            // TODO 4 - Transform the output into a Completable (toCompletable) and subscribe to it using:
+            //.subscribe(CompletableHelper.toObserver(future)) - it reports the failure or success to the `done`
+            // future.
+            .toCompletable()
+            .subscribe(CompletableHelper.toObserver(done));
+        //----
+
+    });
+}
+----
+****
+
+Once done, you can update the compulsive trader:
+
+[source]
+----
+mvn fabric8:deploy
+----
+
+Wan't to run the completed code, append the `-Psolution` to the Maven command.
+
+If you go back to the dashboard, you may start seen some moves on your portfolio. Now 2 traders are trying to make
+you (virtually) rich.
+
+

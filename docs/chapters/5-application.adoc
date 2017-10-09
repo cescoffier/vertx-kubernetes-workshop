@@ -1,4 +1,4 @@
-## The Micro-Trader Application
+== The Micro-Trader Application
 
 Ok, let's stop with playgrounds and get this party started. Now that we know more about Vert.x, microservices and Kubernetes / OpenShift, it's time to discuss the application we are going to develop in this lab.
 

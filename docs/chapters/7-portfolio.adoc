@@ -1,4 +1,4 @@
-## Event bus services - Portfolio service
+== Event bus services - Portfolio service
 
 In the portfolio component, we are going to implement an _event bus service_. A `Portfolio` stores the owned shares and
 the available cash.
@@ -12,7 +12,7 @@ In this chapter, we are going to see:
 
 File referenced in this chapter are located into the `portfolio-service` project.
 
-### RPC and Async RPC
+=== RPC and Async RPC
 
 Microservices are not only about REST. They can be exposed using any types of interactions, _Remote Procedure Calls_ (RPC)
 being one of them. With RPC, a component can effectively send a request to another component by doing a local procedure
@@ -80,7 +80,7 @@ Using async-RPC has several advantages:
 * It deals with failures
 * It avoids sending messages on the event bus and manages object marshalling and unmarshalling for you.
 
-### Async service interface
+=== Async service interface
 
 To create an async RPC service, or event bus service, or service proxies, you first need a Java interface declaring the
  async methods. Open the `io.vertx.workshop.portfolio.PortfolioService` class. You will quickly notice that this

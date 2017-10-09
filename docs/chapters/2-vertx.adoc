@@ -1,9 +1,9 @@
-## Eclipse Vert.x
+== Eclipse Vert.x
 
 We will attempt to explain Vert.x in just a few lines. Remember we said in the previous section that Vert.x is _"a toolkit for building
 reactive applications on the JVM"_.
 
-### Vert.x in 10 minutes
+=== Vert.x in 10 minutes
 
 There are a three important points in this description: **toolkit**, **reactive** and **on the JVM**.
 
@@ -104,7 +104,7 @@ It's time to get your (coding) hands dirty. We are going to start with a few exa
 related to the application we are going to develop later in this lab but are just there to let you start playing
 with Vert.x.
 
-### Exercise 1 - Vert.x applications are Java applications
+=== Exercise 1 - Vert.x applications are Java applications
 
 In this first exercise, let's start from the very beginning:
 
@@ -136,7 +136,7 @@ NOTE: Don't forget to stop the application between runs.
 ----
 ****
 
-### Exercise 2 - Using verticles
+=== Exercise 2 - Using verticles
 
 While using a main method is nice and simple, it does not necessarily scale. When your code base grows, you need a
 better way to structure your code. For this, Vert.x provides _verticles_ - a simple agent-like model. Verticles are
@@ -172,7 +172,7 @@ verticle is always executed by the same thread.
 ----
 ****
 
-### Exercise 3 - Do not block the event loop
+=== Exercise 3 - Do not block the event loop
 
 In this exercise, we are going to voluntarily break the golden rule - block the event loop.
 
@@ -199,7 +199,7 @@ vertx.createHttpServer()
 You may wonder how you will be able to call blocking code. Don't worry, Vert.x provides several ways to do so. A
 construct named `executeBlocking` and a type of verticle named _worker_ are not executed on the event loop.
 
-### Exercise 4 - Sending and receiving messages
+=== Exercise 4 - Sending and receiving messages
 
 Verticles are a great way to structure your code, but how do verticles interact? They use the event bus to 
 send and receive messages. Let's see how it works. Exercise 4 is composed of 2 verticles: a sender and a
@@ -257,7 +257,7 @@ To launch this exercise, use the `io.vertx.workshop.exercise.Exercise4#main` met
 would see the greeting messages printed on the console. Don't forget to stop the application before switching to the
 next exercise.
 
-### Exercise 5 - Request Reply and Composing actions
+=== Exercise 5 - Request Reply and Composing actions
 
 Let's now mix the HTTP server and the event bus. The first verticle creates an HTTP server, but to respond to the
 request, it sends a message to another verticle and _waits_ for a reply. This reply is used as response to the HTTP
@@ -328,7 +328,7 @@ This exercise shows how to compose asynchronous actions and how to use the `Asyn
 imagine, it quicksly ends up with lots of callbacks. Let's move to the next example to show how RX Java can help
 in taming the asynchronous coordination.
 
-### Exercise 6 - Use RX Java 2
+=== Exercise 6 - Use RX Java 2
 
 This exercise is a rewrite of the previous one using RX Java 2. RX Java is an implementation of the _reactive
 programming_ principles for Java. With this development model, we manipulate _streams_ (called `Flowable`,
@@ -380,7 +380,7 @@ Launch the exercise using the `Exercise6#main` method. Check the result by openi
 http://localhost:8080 (should display `hello world`) and http://localhost:8080?name=vert.x (should display `hello
 vert.x`).
 
-### Let's move on
+=== Let's move on
 
 By now, you should have a better understanding of Vert.x and how to use it. But that's just the beginning. Serious
 things are coming ...

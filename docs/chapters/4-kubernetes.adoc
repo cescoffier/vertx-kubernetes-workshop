@@ -1,4 +1,4 @@
-## First step with Kubernetes
+== First step with Kubernetes
 
 Following a microservice approach will help you increase your _agility_. However, it does not come for free and
 requires a lot of discipline. It also stresses your deployment facilities. When the number of microservices grows, it
@@ -12,9 +12,9 @@ collectively provide mechanisms for deploying, maintaining, and scaling applicat
 
 image::openshift-architecture.png[OpenShift Architecture, 800]
 
-### Primitives
+=== Primitives
 
-#### Pod
+==== Pod
 
 The basic scheduling unit in Kubernetes is called a _pod_. It adds a higher level of abstraction to containerized components.
 A pod consists of one or more containers that are guaranteed to be co-located on the host machine and can share resources.
@@ -23,14 +23,14 @@ Each pod in Kubernetes is assigned a unique (within the cluster) IP address, whi
  the containers in the pod. Pods can be manually managed through the Kubernetes API, or their management can be
  delegated to a controller.
 
-#### Labels and Selectors
+==== Labels and Selectors
 
 Kubernetes enables clients (users or internal components) to attach key-value pairs called _labels_ to any API object
  in the system, such as pods. Correspondingly, _label selectors_ are queries against labels that resolve to matching
  objects. Labels and selectors are the primary grouping mechanism in Kubernetes and are used to determine the components
  to which an operation applies. Labels and selectors are used to group entities together.
 
-#### Replication Controller and Deployment
+==== Replication Controller and Deployment
 
 Controllers are entities managing other entities in order to keep them in a specific state. For instance, a
 replication controller has the responsibility to keep alive _x_ replicas of a pod. When one of these replicas dies or
@@ -53,7 +53,7 @@ updates and ensures that you don't disrupt your service. Before stopping the pod
 ready. Then, it routes requests to this new pod and dispose the old one.  Other strategies provided include _recreate_, 
 _blue-green_, _A/B_, and the ability to create a custom strategy.
 
-#### Build and Image
+==== Build and Image
 
 As stated in the previous section, `deployments` are responsible for keeping the application running. But we need to
 provide the application first. The application is pushed to OpenShift as an (container) _image_. This image is
@@ -71,7 +71,7 @@ This build creates an image for starting the application.
 
 image::openshift-build-process.png[OpenShift Build Process, 800]
 
-#### Services
+==== Services
 
 Ok, so we know how our application is going to be _built_ and instantiated on OpenShift. But how are we going to use
 it? For this we need _services_. A _service_ identifies a set of pods (using labels) in order to proxy the connections
@@ -83,7 +83,7 @@ uses a label selector to find all the containers running that provide a certain 
 
 image::openshift-service.png[OpenShift Services, 400]
 
-#### Routes
+==== Routes
 
 _Routes_ are the last concept to understand before starting to use OpenShift. Services provides an internal IP.
 Routes exposes a service outside of OpenShift. A route allows you to associate a service with an externally-reachable
@@ -91,7 +91,7 @@ Routes exposes a service outside of OpenShift. A route allows you to associate a
 
 image::openshift-entities.png[OpenShift Entities, 800]
 
-### Installing and Starting OpenShift
+=== Installing and Starting OpenShift
 
 We are going to use _minishift_ (https://github.com/minishift/minishift) to run OpenShift locally on your machine.
 
@@ -127,7 +127,7 @@ TIP: for Unix style shells you can run `eval $(minishift oc-env)` to make `oc` a
 
 Now, you are ready to deploy your first application.
 
-### Your first project and deployment
+=== Your first project and deployment
 
 We are going to use a specific project to host all the microservices developed in this lab. A `project` is a
 namespace making easy to organize your different applications in OpenShift. In a terminal run:

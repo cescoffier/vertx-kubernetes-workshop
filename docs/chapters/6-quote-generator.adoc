@@ -1,4 +1,4 @@
-## The first microservice - the quote generator
+== The first microservice - the quote generator
 
 Disclaimer, the quote generator is unrealistic, and is basically a set of randoms...
 
@@ -13,7 +13,7 @@ In this chapter, we are going to see:
 This chapter is the introduction of the lab. We recommend that you do it so you have a better understanding of the
 structured exchanges between the different microservices.
 
-### Project structure
+=== Project structure
 
 Let's have a look at the project, as every other project are structured the same way.
 
@@ -83,7 +83,7 @@ The `pom.xml` file also contains a set of properties used to configure the appli
 * `vertx.verticle` defines the main verticle - the entry point
 * `vertx.cluster.name` defines the name of the cluster
 
-### Verticle
+=== Verticle
 
 As you may have noticed, the code is structured in 3 `verticles`, but what are these? Verticles are a way to structure
  Vert.x application code. It's not mandatory, but it is quite convenient. A verticle is a chunk of code that is
@@ -184,7 +184,7 @@ quotes (but, you are going to work on it). Note that this service is not explici
 That's because Kubernetes is taking care of this part. The Vert.x service discovery interacts with Kubernetes
 _services_, so all Kubernetes services can be retrieved by Vert.x.
 
-### The quote REST endpoint
+=== The quote REST endpoint
 
 It's time for you to develop some parts of the application (I know you have pins and needles in your fingers). Open the
 `RestQuoteAPIVerticle` file. It's a verticle class extending `AbstractVerticle`. In the `start` method you need to:
@@ -197,7 +197,7 @@ architecture. So, it's important to understand how they work and how we manipula
 
 Let's do that....
 
-#### Task - Implementing a Handler to receive events
+==== Task - Implementing a Handler to receive events
 
 The first action is about observing the stream of _market_ messages. This is done using
 `vertx.eventBus().<JsonObject>consumer(GeneratorConfigVerticle.ADDRESS).toFlowable()`. We now have the stream of
@@ -224,7 +224,7 @@ messages, but we need to extract the JSON body and populate the `quotes` map. Im
 First, it retrieves the message body (1) and then stores it in the `quotes` map (2). Note that it's a JSON object.
 ****
 
-#### Task - Implementing a Handler to handle HTTP requests
+==== Task - Implementing a Handler to handle HTTP requests
 
 Now that you have the `quotes`, let's use them to handle HTTP requests. The code already creates the HTTP server and
 provides the stream of HTTP requests. The stream emits an item for every HTTP request received by the server. So, you
@@ -289,7 +289,7 @@ the **same** event loop, so it's always accessed by the **same** thread, never c
 
 TIP: The `Map<String, JsonObject>` could be replaced by a simple `JsonObject` as they behave as a `Map<String, Object>`.
 
-### Time to start the quote generator
+=== Time to start the quote generator
 
 First, let's build the microservice _fat-jar_. In the terminal, execute:
 
@@ -341,7 +341,7 @@ You should see:
 It gives the current details of each quotes. The data is updated every 3 seconds, so refresh your browser to get
 the latest data.
 
-### You are not a financial expert ?
+=== You are not a financial expert ?
 
 So maybe you are not used to the financial world and words... Neither am I, and this is a overly simplified version.
 Let's define the important fields:
