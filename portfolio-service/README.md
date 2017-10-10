@@ -11,7 +11,7 @@ operation, it sends a message on the event bus.
 mvn clean package
 ```
 
-## Deployment
+## Deploy
 
 ```
 mvn fabric8:deploy

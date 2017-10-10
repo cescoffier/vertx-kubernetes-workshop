@@ -12,5 +12,13 @@
 
   <artifactId>vertx-exercises</artifactId>
 
-  
+
+  <profiles>
+    <profile>
+      <id>solution</id>
+      <properties>
+        <source.dir>src/main/java</source.dir>
+      </properties>
+    </profile>
+  </profiles>
 </project>

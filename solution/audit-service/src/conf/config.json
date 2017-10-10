@@ -1,4 +1,0 @@
-{
-  "url": "jdbc:hsqldb:file:./target/audit-db;shutdown=true",
-  "driverclass" : "org.hsqldb.jdbcDriver"
-}

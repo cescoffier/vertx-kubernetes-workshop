@@ -9,8 +9,8 @@ The audit service receives operation (shares bought or sold) from the event bus 
 mvn clean package
 ```
 
-## Run
+## Deploy
 
 ```
-java -jar target/audit-service-1.0-SNAPSHOT-fat.jar
+mvn fabric8:deploy
 ```

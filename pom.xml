@@ -21,7 +21,6 @@
 
   <modules>
     <module>currency-3rdparty-service</module>
-    <module>vertx-workshop-common</module>
     <module>quote-generator</module>
     <module>portfolio-service</module>
     <module>audit-service</module>
