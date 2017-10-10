@@ -1,4 +1,4 @@
-## Conclusion
+== Conclusion
 
 You made it ! Or you jumped to this section. Anyway, congratulations. We hope you enjoy this lab and learn some
 _stuff_. There is many other things Vert.x can do and that was not illustrated here.
@@ -10,9 +10,13 @@ Don't forget that reactive systems and so Vert.x requires a mind-shift:
 convenient very quickly. Don't also forget, computers are asynchronous, so using such development model is
 using it the right way to use it to its whole power.
 
+As soon as you jump into the microservice wagon, you will need a better "hosting" environment. Kubernetes and
+OpenShift are perfect weapon to build, deploy, bind, and manage your microservices.
+
 If you want, and I hope so, to go further here are some references:
 
 * http://vertx.io[The Vert.x web site]
 * http://vertx.io/blog/posts/introduction-to-vertx.html[A blog post series to start developing with Vert.x]
-* https://github.com/vert-x3/vertx-microservice-toolbox[a set of building blocks for microservice-based applications]
+* https://developers.redhat.com/promotions/building-reactive-microservices-in-java/[A free book about Eclipse Vert.x
+and microservices]
 

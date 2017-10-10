@@ -1,0 +1,423 @@
+== The Audit service
+
+The law is the law... The _Sarbanes–Oxley Act_ requires you to keep a track of every transaction you do on a
+ financial market. The audit service records the shares you buy and sell in a database. It's going to be a PostGreSQL
+ database, but is would be similar with another database, even no-sql database. The database is going to be deployed
+ in OpenShift.
+
+In this chapter we are going to cover:
+* advanced asynchronous orchestration
+* asynchronous JDBC
+* Vert.x Web to build REST API
+* Managing _secrets_ with OpenShift
+
+
+
+=== Accessing data asynchronously
+
+As said previously, Vert.x is asynchronous and you must never block the event loop. And you know what's definitely
+blocking ? Database accesses and more particularly JDBC! Fortunately, Vert.x provides a JDBC client that is asynchronous.
+
+The principle is simple (and is applied to all clients accessing blocking systems):
+
+[plantuml, database-sequence, png]
+----
+@startuml
+autonumber
+participant Application
+participant Handler
+participant Client
+control Worker
+database Database
+
+Application -> Client : The application send the query, instruction,\n statement to the client; with a Handler
+Client -> Worker : The client enqueue in a Worker the task to be done
+Client -> Application : The client returns immediately
+Worker -> Database : The worker executes the task on the database
+Worker -> Client : When done, the worker notify the client
+Client -> Handler : The client invokes the handler \n(in the same thread as the interaction (1))\n with the operation result.
+
+@enduml
+----
+
+NOTE: _Worker_ ? Yes, Vert.x has the notion of _workers_ (a separated thread pool) to execute blocking code. It can be a
+ verticle marked as _worker_ or with the `vertx.executeBlocking` construct. However, even if possible, you should not
+ abuse from these features as it reduces the scalability of the application.
+
+However, interactions with databases are rarely a single operation, but a composition of operations. For example:
+
+1. Get a connection
+2. Drop some tables
+3. Create some tables
+4. Close the connection
+
+So, we need a way to compose these operations, and report failures when required. This is what we are going to see
+in the Audit service.
+
+=== The Audit service
+
+The Audit service:
+
+1. Listens for the financial operations on the event bus
+2. Stores the received operations in a database
+3. Exposes a REST API to get the last 10 operations
+
+Interactions with the database use the `vertx-jdbc-client`, an async version of JDBC. So expect to see some SQL code
+(I know you love it). But, to orchestrate all these asynchronous calls, we need the right weapons. We are going to
+use RX Java 2 for this.
+
+=== Task - Composing methods returning Single.
+
+Open the `io.vertx.workshop.audit.impl.AuditVerticle` class. The first important detail of this verticle is its
+`start` method. As the `start` method from the traders, the method is asynchronous, and report its completion in the
+ given `Future` object:
+
+[source, java]
+----
+  public void start(Future<Void> future) {
+     Single<JDBCClient> jdbc = JDBCDataSource.rxGetJDBCClient(discovery,
+        svc -> svc.getName().equals("audit-database"),
+        getDatabaseConfiguration()
+     );
+
+    // TODO
+    // ----
+    Single<MessageConsumer<JsonObject>> ready = Single.error(new UnsupportedOperationException("not yet implemented"));
+    // ----
+
+    readySingle.doOnSuccess(consumer -> {
+      // on success we set the handler that will store message in the database
+      consumer.handler(message -> storeInDatabase(message.body()));
+    }).subscribe(consumer -> {
+      // complete the verticle start with a success
+      future.complete();
+    }, error -> {
+      // signal a verticle start failure
+      future.fail(error);
+    });
+  }
+----
+
+Vert.x would consider the verticle deploy when the `Future` is valuated. It may also report a failure if the verticle
+ cannot be started correctly.
+
+Initializing the audit service includes:
+
+* Discover and configure the database (already in the code), and prepare the database (create the table),
+* Start the HTTP service and expose the REST API,
+* Retrieve the message source on which the operation are sent
+
+So, it's clearly 3 independent actions, but the audit service is started only when all of them has been completed.
+So, we need to implement this orchestration.
+
+Replace the `TODO` block with some code. This code should retrieves 3 `Single` objects (from methods provided in the
+class) and _wait_ for the completion of the three tasks. The three singles should be combined in one `Single<MessageConsumer<JsonObject>>`. Don't forget that the `initializeDatabase` requires the JDBC client as
+parameter and so should be called once the `jdbc` `Single` has completed. Also look at the
+`retrieveThePortfolioMessageSource` method to see how you can create a `Single` object from an already known entity
+(we should have used service discovery - it's just to give an example). When you have the three `Singles`, _zip_ them
+ to be notified when all of them have completed. The _zip_ function must return the `MessageConsumer<JsonObject>>`.
+
+On success this `Single` registers a message listener on the portfolio message source storing the operation in the
+database for each received message.
+
+Its completion notifies Vert.x that the start process is completed (or successfully or not), it calls `future.complete()` and
+`future.fail(cause)`.
+
+[.assignment]
+****
+[source, java]
+----
+Single<JDBCClient> databaseReady = jdbc
+    .flatMap(client -> initializeDatabase(client, true));
+Single<HttpServer> httpServerReady = configureTheHTTPServer();
+Single<MessageConsumer<JsonObject>> messageConsumerReady = retrieveThePortfolioMessageSource();
+
+Single<MessageConsumer<JsonObject>> readySingle = Single.zip(databaseReady, httpServerReady,
+    messageConsumerReady, (db, http, consumer) -> consumer);
+----
+
+First we create 3 `Single`, one per action to execute. We are going to see how they are created in a minute. Then we
+compose all of them using the `Single.zip` operator. The zip function returns the consumer single as this is the
+one we really care about.
+****
+
+=== Task - Implementing a method returning a Single & Vert.x Web
+
+Ok, but some of the method we used in the previous section are not totally functional ;-). Let's fix this. Look at the  `configureTheHTTPServer` method.  In this method we are going to use a new Vert.x
+Component: Vert.x Web. Vert.x Web is a Vert.x extension to build modern web application. Here we are going to use
+a `Router` which let us implement _REST_ APIs easily (_à la_ Hapi or ExpressJS). So:
+
+1. Create a `Router` object with: `Router.router(vertx)`
+2. Register a route (on `/`) on the router, calling `retrieveOperations` (using `router.get("/").handler(...)`)
+3. Create a HTTP server delegating the request handler to `router.accept`.
+4. Retrieve the port passed in the configuration or `0` if not set (it picks an available port), we can pick
+    a random port as it is exposed in the service record, so consumer are bound to the right port.
+5. Start the server with the `rxListen` version of the listen method that returns a single.
+
+[.assignment]
+****
+[source, java]
+----
+private Single<HttpServer> configureTheHTTPServer() {
+    Router router = Router.router(vertx);
+    router.get("/").handler(this::retrieveOperations);
+    return vertx.createHttpServer()
+        .requestHandler(router::accept)
+        .rxListen(8080);
+}
+----
+
+It creates a `Router`. The `Router` is an object from http://vertx.io/docs/vertx-web/java/[Vert.x web] that ease the
+creation of REST API with Vert.x. We won't go into too much details here, but if you want to implement REST API with
+Vert.x, this is the way to go. On our `Router` we declare a _route_: when a request arrive on `/`, it calls this `Handler`.
+Then, we create the HTTP server. The `requestHandler` is a specific method of the `router`, and we  return the result
+of the `rxListen` method.
+****
+
+So, the caller can call this method and get a `Single`. It can subscribe on it to bind the server and be notified
+of the completion of the operation (or failure).
+
+=== Using Async JDBC
+
+In the `start` method, we are calling `initializeDatabase`. This method is also not very functional at this point.
+Let's  look at this method using another type of action composition. This method:
+
+* get a connection to the database
+* drop the table
+* create the table
+* close the connection (whatever the result of the two last operations)
+
+All these operations may fail. Unlike in the `start` method where the actions were unrelated, these actions are
+related. Fortunately, we can _chain_ asynchronous action using the `flatMap` operator of RX Java 2.
+
+[source, code]
+----
+Single<X> chain = input.flatMap(function1);
+----
+
+So to use the composition pattern, we just need a set of `Functions` and a `Single` that would trigger the chain.
+
+Let's start slowly. In the `TODO` block, write the following snippet to create the `Single` trigger the chain:
+
+[source, java]
+----
+// This is the starting point of our operations
+// This single will be completed when the connection with the database is established.
+// We are going to use this single as a reference on the connection to close it.
+Single<SQLConnection> connectionRetrieved = jdbc.rxGetConnection();
+----
+
+Then, we need compose the `Single` with the `flatMap` operator that is taking a `SQLConnection` as parameter and returns
+a `Single` containing the result of the database initialization:
+
+1. we create the batch to execute
+2. the `rxBatch` executes the batch gives us the single returns of the operation
+3. finally we close the connection with `doAfterTerminate`
+
+So, write:
+
+[source,java]
+----
+connectionRetrieved
+    .flatMap(conn -> {
+        // When the connection is retrieved
+
+        // Prepare the batch
+        List<String> batch = new ArrayList<>();
+        if (drop) {
+            // When the table is dropped, we recreate it
+            batch.add(DROP_STATEMENT);
+        }
+        // Just create the table
+        batch.add(CREATE_TABLE_STATEMENT);
+
+        // We compose with a statement batch
+        Single<List<Integer>> next = conn.rxBatch(batch);
+
+        // Whatever the result, if the connection has been retrieved, close it
+        return next.doAfterTerminate(conn::close);
+    });
+----
+
+The previous statement return a `Single<List<Integer>>` but we need a `Single<JDBCClient>`. Append `.map(x -> jdbc)`
+and return the result:
+
+[source,java]
+----
+return connectionRetrieved
+    .flatMap(conn -> {
+        // When the connection is retrieved
+
+        // Prepare the batch
+        List<String> batch = new ArrayList<>();
+        if (drop) {
+            // When the table is dropped, we recreate it
+            batch.add(DROP_STATEMENT);
+        }
+        // Just create the table
+        batch.add(CREATE_TABLE_STATEMENT);
+
+        // We compose with a statement batch
+        Single<List<Integer>> next = conn.rxBatch(batch);
+
+        // Whatever the result, if the connection has been retrieved, close it
+        return next.doAfterTerminate(conn::close);
+    })
+    .map(list -> client);
+----
+
+And voilà!
+
+=== Task - Async JDBC with a callback-based composition
+
+You may ask why we do such kind of composition. Let's implement a method without any composition operator (just using
+ callbacks). The `retrieveOperations` method is called when a HTTP request arrives and should return a JSON object
+ containing the last 10 operations. So, in other words:
+
+1. Get a connection to the database
+2. Query the database
+3. Iterate over the result to get the list
+4. Write the list in the HTTP response
+5. Close the database
+
+The step (1) and (2) are asynchronous. (5) is asynchronous too, but we don't have to wait for the completion. In this
+ code, don't use composition (that's the purpose of this exercise). In `retrieveOperations`, write the required code using _Handlers_ / _Callbacks_.
+
+[.assignment]
+****
+[source, java]
+----
+// 1. Get the connection
+jdbc.getConnection(ar -> {
+    SQLConnection connection = ar.result();
+    if (ar.failed()) {
+        context.fail(ar.cause());
+    } else {
+        // 2. When done, execute the query
+        connection.query(SELECT_STATEMENT, result -> {
+            // 3. When done, iterate over the result to build a list
+            ResultSet set = result.result();
+            List<JsonObject> operations = set.getRows().stream()
+                .map(json -> new JsonObject(json.getString("operation")))
+                .collect(Collectors.toList());
+            // 5. write this list into the response
+            context.response().setStatusCode(200).end(Json.encodePrettily(operations));
+            // 6. close the connection
+            connection.close();
+        });
+    }
+});
+----
+****
+
+So obviously it's possible too not use RX Java. But imagine when you have several asynchronous operations to
+chain, it become a callback hell very quickly. But again, Vert.x gives you the freedom to choose what you prefer.
+
+=== Show time !
+
+Let's see how this works. But wait.... we need a database!
+
+Deploy the database in OpenShift using:
+
+[source]
+----
+cd audit-service
+oc new-app -e POSTGRESQL_USER=admin -ePOSTGRESQL_PASSWORD=secret -ePOSTGRESQL_DATABASE=audit registry.access.redhat.com/rhscl/postgresql-94-rhel7 --name=audit-database
+----
+
+It creates a new database _service_ named `audit-database` with the given credentials and settings. Be aware that for
+ sake of simplicity this database is not using a persistent storage.
+
+Now, we can deploy our audit service:
+
+[source]
+----
+mvn fabric8:deploy
+----
+
+TIP: Didn't get the time to do everything... append `-Psolution`
+
+Refresh the dashboard, and you should see the operations in the top right corner!
+
+
+=== Managing secrets
+
+But wait... we have hardcoded the database credentials in our code. This is not _optimal_. OpenShift provides a way
+to manage _secrets_.
+
+Let's first create a `Secret` entity using:
+
+[source]
+----
+oc create -f src/kubernetes/database-secret.yaml
+----
+
+You can open the specified file and see how this object is structured. Basically it's a set of key/value pairs.
+
+There are several ways to access _secrets_ from your application:
+
+* _ENV_ variables
+* Mounted as a file
+* Using the Vert.x config
+
+For sake of simplicity we are going to use the first approach.
+
+So, we first need to bind the _secret_ with our _deployment_. Open the `src/main/fabric8/deployment.yml` and copy the
+ following content (or uncomment the commented part):
+
+[source, yaml]
+----
+spec:
+  template:
+    spec:
+      containers:
+        - name: vertx
+          ports:
+            - name: infinispan
+              containerPort: 8888
+              protocol: TCP
+          env:
+            - name: OPENSHIFT_KUBE_PING_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: JAVA_OPTIONS
+              value: '-Dvertx.cacheDirBase=/tmp -Dvertx.jgroups.config=jgroups-kubernetes.xml -Djava.net.preferIPv4Stack=true'
+            - name: JAVA_ARGS
+              value: '-cluster'
+            - name: DB_USERNAME
+              valueFrom:
+                 secretKeyRef:
+                   name: audit-database-config
+                   key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                 secretKeyRef:
+                   name: audit-database-config
+                   key: password
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: audit-database-config
+                  key: url
+----
+
+Notice the 3 last _env_ variables retrieving values from the `audit-database-config` secret.
+
+Now, we need to update our code. Open `io.vertx.workshop.audit.impl.AuditVerticle` and replace the content of the `getDatabaseConfiguration` method with:
+
+[source, java]
+----
+return new JsonObject()
+    .put("user", System.getenv("DB_USERNAME"))
+    .put("password", System.getenv("DB_PASSWORD"))
+    .put("driver_class", "org.postgresql.Driver")
+    .put("url", System.getenv("DB_URL"));
+----
+
+And redeploy your service using: `mvn fabric8:deploy`.
+
+Voilà! we have externalize the credentials from the application.
+
+

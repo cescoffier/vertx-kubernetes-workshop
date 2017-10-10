@@ -56,8 +56,13 @@ public class AuditVerticle extends AbstractVerticle {
             // TODO
             // ----
 
-            Single<MessageConsumer<JsonObject>> readySingle = Single
-                .error(new UnsupportedOperationException("Not implemented yet"));
+            Single<JDBCClient> databaseReady = jdbc
+                .flatMap(client -> initializeDatabase(client, true));
+            Single<HttpServer> httpServerReady = configureTheHTTPServer();
+            Single<MessageConsumer<JsonObject>> messageConsumerReady = retrieveThePortfolioMessageSource();
+
+            Single<MessageConsumer<JsonObject>> readySingle = Single.zip(databaseReady, httpServerReady,
+                messageConsumerReady, (db, http, consumer) -> consumer);
 
             // ----
 
@@ -100,7 +105,23 @@ public class AuditVerticle extends AbstractVerticle {
 
         //TODO
         // ----
-
+        jdbc.getConnection(ar -> {
+            SQLConnection connection = ar.result();
+            if (ar.failed()) {
+                context.fail(ar.cause());
+            } else {
+                connection.query(SELECT_STATEMENT, result -> {
+                    ResultSet set = result.result();
+                    List<JsonObject> operations = set.getRows().stream()
+                        .map(json -> new JsonObject(json.getString("operation")))
+                        .collect(Collectors.toList());
+                    // 5. write this list into the response
+                    context.response().setStatusCode(200).end(Json.encodePrettily(operations));
+                    // 6. close the connection
+                    connection.close();
+                });
+            }
+        });
         // ----
     }
 
@@ -109,10 +130,12 @@ public class AuditVerticle extends AbstractVerticle {
         //TODO
         //----
 
-        return Single
-            .error(new UnsupportedOperationException("Not implemented yet"));
+        Router router = Router.router(vertx);
+        router.get("/").handler(this::retrieveOperations);
+        return vertx.createHttpServer().requestHandler(router::accept).rxListen(8080);
         //----
 
+//        return ready;
     }
 
     private Single<MessageConsumer<JsonObject>> retrieveThePortfolioMessageSource() {
@@ -157,7 +180,32 @@ public class AuditVerticle extends AbstractVerticle {
         // retrieve the connection -> drop table -> create table -> close the connection
         // For this we use `Func1<X, Single<R>>`that takes a parameter `X` and return a `Single<R>` object.
 
-        return Single.error(new UnsupportedOperationException("Not implemented yet"));
+        // This is the starting point of our operations
+        // This single will be completed when the connection with the database is established.
+        // We are going to use this single as a reference on the connection to close it.
+        Single<SQLConnection> connectionRetrieved = client.rxGetConnection();
+
+        // Ok, now it's time to chain all these actions (2 to 4):
+        return connectionRetrieved
+            .flatMap(conn -> {
+                // When the connection is retrieved
+
+                // Prepare the batch
+                List<String> batch = new ArrayList<>();
+                if (drop) {
+                    // When the table is dropped, we recreate it
+                    batch.add(DROP_STATEMENT);
+                }
+                // Just create the table
+                batch.add(CREATE_TABLE_STATEMENT);
+
+                // We compose with a statement batch
+                Single<List<Integer>> next = conn.rxBatch(batch);
+
+                // Whatever the result, if the connection has been retrieved, close it
+                return next.doAfterTerminate(conn::close);
+            })
+            .map(list -> client);
         // ----
 
     }

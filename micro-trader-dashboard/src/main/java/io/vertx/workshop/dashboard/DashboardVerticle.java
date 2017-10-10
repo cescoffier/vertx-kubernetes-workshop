@@ -14,7 +14,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.handler.sockjs.BridgeOptions;
 import io.vertx.ext.web.handler.sockjs.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
@@ -27,7 +26,6 @@ import io.vertx.servicediscovery.types.HttpEndpoint;
 public class DashboardVerticle extends AbstractVerticle {
 
     private ServiceDiscovery discovery;
-    private WebClient client;
 
     @Override
     public void start() throws Exception {
@@ -76,32 +74,32 @@ public class DashboardVerticle extends AbstractVerticle {
     }
 
 
-    private Future<Void> retrieveAuditService() {
+    private Future<WebClient> retrieveAuditService() {
         return Future.future(future -> {
-            HttpEndpoint.getWebClient(discovery, new JsonObject().put("name", "audit"), client -> {
-                this.client = client.result();
-                future.handle(client.map((Void)null));
-            });
+            HttpEndpoint.getWebClient(discovery, new JsonObject().put("name", "audit"), future);
         });
     }
 
 
     private void callAuditService(RoutingContext context) {
-        if (client == null) {
-            context.response()
-                .putHeader("content-type", "application/json")
-                .setStatusCode(200)
-                .end(new JsonObject().put("message", "No audit service").encode());
-        } else {
-            client.get("/").send(ar -> {
-                if (ar.succeeded()) {
-                    HttpResponse<Buffer> response = ar.result();
+        retrieveAuditService()
+            .setHandler(ar -> {
+                if (ar.failed() || ar.result() == null) {
                     context.response()
                         .putHeader("content-type", "application/json")
                         .setStatusCode(200)
-                        .end(response.body());
+                        .end(new JsonObject().put("message", "No audit service").encode());
+                } else {
+                    ar.result().get("/").send(res -> {
+                        if (res.succeeded()) {
+                            HttpResponse<Buffer> response = res.result();
+                            context.response()
+                                .putHeader("content-type", "application/json")
+                                .setStatusCode(200)
+                                .end(response.body());
+                        }
+                    });
                 }
             });
-        }
     }
 }
