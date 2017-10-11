@@ -19,7 +19,7 @@ public class GeneratorConfigVerticleTest {
 
     @Test
     public void test() throws IOException {
-        byte[] bytes = Files.readAllBytes(new File("src/test/resources/config.json").toPath());
+        byte[] bytes = Files.readAllBytes(new File("src/test/resources/config/config.json").toPath());
         JsonObject config = new JsonObject(new String(bytes, "UTF-8"));
 
         Vertx vertx = Vertx.vertx();

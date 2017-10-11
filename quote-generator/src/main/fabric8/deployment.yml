@@ -1,6 +1,17 @@
 spec:
   template:
     spec:
+      # Declare a volume mounting the config map
+      volumes:
+        - configMap:
+            # Name of the config map
+            name: app-config
+            # Define the items from the config map to mount
+            items:
+            - key: config.json
+              path: config.json
+            # Volume name (used as reference below)
+          name: config
       containers:
         - name: vertx
           ports:
@@ -16,4 +27,12 @@ spec:
             - name: JAVA_OPTIONS
               value: '-Dvertx.cacheDirBase=/tmp -Dvertx.jgroups.config=jgroups-kubernetes.xml -Djava.net.preferIPv4Stack=true'
             - name: JAVA_ARGS
-              value: '-Dvertx.cacheDirBase=/tmp -Dvertx.jgroups.config=jgroups-kubernetes.xml -Djava.net.preferIPv4Stack=true -cluster'
+              value: '-cluster'
+          # Mount the volume define above in /deployments/config
+          volumeMounts:
+            - name: config
+              mountPath: /deployments/config
+
+
+
+#/deployments

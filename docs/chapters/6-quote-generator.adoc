@@ -8,6 +8,7 @@ In this chapter, we are going to see:
 * how to use the event bus to receive messages
 * how to implement HTTP actions
 * how to use RX Java 2 to avoid callbacks
+* using config maps to configure the application
 
 
 This chapter is the introduction of the lab. We recommend that you do it so you have a better understanding of the
@@ -23,6 +24,7 @@ Let's have a look at the project, as every other project are structured the same
 |-- README.md  <----- A readme containing the description and (build) instructions
 |-- pom.xml  <----- The project build file
 |-- src
+|   |-- kubernetes/config.json <---- The configuration of the application
 |   |-- main
 |   |   |-- fabric8
 |   |   |   `-- deployment.yml  <----- The Kubernetes deployment customization
@@ -32,7 +34,6 @@ Let's have a look at the project, as every other project are structured the same
 |   |   |                   |-- MarketDataVerticle.java
 |   |   |                   `-- RestQuoteAPIVerticle.java
 |   |   |-- resources  <----- The resources used at runtime
-|   |   |   |-- config.json  <----- The configuration listing the companies
 |   |   |   `-- jgroups-kubernetes.xml  <----- The cluster configuration
 |   |   `-- solution
 |   |       `-- io/vertx/workshop/quote  <----- The complete code (including the answers to the assignments)
@@ -62,7 +63,7 @@ Let's have a look at the project, as every other project are structured the same
     |    |                    ├── MarketDataVerticle.java
     |    |                    └── RestQuoteAPIVerticle.java
     |    └── resources
-    |         └── config.json <--- the configuration
+    |         └── config.json <--- the test configuration
     |         └── jgroups-kubernetes.xml <--- the cluster configuration
 ----
 
@@ -289,9 +290,54 @@ the **same** event loop, so it's always accessed by the **same** thread, never c
 
 TIP: The `Map<String, JsonObject>` could be replaced by a simple `JsonObject` as they behave as a `Map<String, Object>`.
 
+=== Creating a config map
+
+A config map is a Kubernetes entity storing the configuration of an application. The application configuration is in
+`src/kubernetes/config.json`. We are going to create a _config map_ from this file. In a terminal, execute:
+
+[source, bash]
+----
+cd quote-generator
+oc create configmap app-config --from-file=src/kubernetes/config.json
+----
+
+To check that the config map has been created correctly, execute:
+
+[source, bash]
+----
+oc get configmap -o yaml
+----
+
+It should display the Kubernetes entity and in the `data` entry our json content.
+
+Now that the config map is created, let's read it from our application. There are several ways to consume a config
+map:
+
+* ENV variables
+* Config mounted as a file
+* Vert.x Config
+
+We are going to use the second approach and mount the configuration as a file in the application container. Indeed,
+our application has been configured to read its configuration from a `config/config.json` file:
+
+[source,java]
+----
+private ConfigRetrieverOptions getConfigurationOptions() {
+    JsonObject path = new JsonObject().put("path", "config/config.json");
+    return new ConfigRetrieverOptions().addStore(new ConfigStoreOptions().setType("file").setConfig(path));
+}
+----
+
+Fortunately, our `deployment.yaml` located in `src/main/fabric8` contains the right configuration to:
+
+1. define a _volume_ with the config map content
+2. mount this volume in the right directory
+
+You can also see that this file contains the JAVA options we pass to the process.
+
 === Time to start the quote generator
 
-First, let's build the microservice _fat-jar_. In the terminal, execute:
+Show time! Let's build and deploy the microservice _fat-jar_. In the terminal, execute:
 
 ----
 cd quote-generator
