@@ -62,7 +62,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     public void evaluate(Handler<AsyncResult<Double>> resultHandler) {
         // TODO
         // ----
-        Single<WebClient> quotes = HttpEndpoint.rxGetWebClient(discovery, rec -> rec.getName().equals("quotes"));
+        Single<WebClient> quotes = HttpEndpoint.rxGetWebClient(discovery, rec -> rec.getName().equals("quote-generator"));
         quotes.subscribe((client, err) -> {
             if (err != null) {
                 resultHandler.handle(Future.failedFuture(err));
@@ -85,8 +85,10 @@ public class PortfolioServiceImpl implements PortfolioService {
             // We report the result or failure
             .subscribe((sum, err) -> {
                 if (err != null) {
+                    System.out.println("Evaluation of the portfolio failed " + err.getMessage());
                     resultHandler.handle(Future.failedFuture(err));
                 } else {
+                    System.out.println("Evaluation of the portfolio succeeeded");
                     resultHandler.handle(Future.succeededFuture(sum));
                 }
             });
@@ -96,7 +98,7 @@ public class PortfolioServiceImpl implements PortfolioService {
         //TODO
         //----
 
-        return client.get("/name?" + encode(company))
+        return client.get("/?name=" + encode(company))
             .as(BodyCodec.jsonObject())
             .rxSend()
             .map(HttpResponse::body)
