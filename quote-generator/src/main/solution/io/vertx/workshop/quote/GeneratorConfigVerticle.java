@@ -68,7 +68,7 @@ public class GeneratorConfigVerticle extends AbstractVerticle {
     }
 
     private ConfigRetrieverOptions getConfigurationOptions() {
-        JsonObject path = new JsonObject().put("path", "config.json");
+        JsonObject path = new JsonObject().put("path", "config/config.json");
         return new ConfigRetrieverOptions().addStore(new ConfigStoreOptions().setType("file").setConfig(path));
     }
 }
