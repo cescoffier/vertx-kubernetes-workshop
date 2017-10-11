@@ -28,6 +28,7 @@
     <module>vertx-exercises</module>
     <module>microservices-exercises</module>
     <module>micro-trader-dashboard</module>
+    <module>currency-service</module>
   </modules>
 
   <profiles>
