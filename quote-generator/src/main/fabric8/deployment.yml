@@ -32,7 +32,3 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /deployments/config
-
-
-
-#/deployments

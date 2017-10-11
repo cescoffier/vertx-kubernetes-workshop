@@ -33,6 +33,7 @@ public class AuditVerticle extends AbstractVerticle {
     private static final String SELECT_STATEMENT = "SELECT * FROM AUDIT ORDER BY ID DESC LIMIT 10";
 
     private JDBCClient jdbc;
+    private boolean ready;
 
     /**
      * Starts the verticle asynchronously. The the initialization is completed, it calls
@@ -73,6 +74,7 @@ public class AuditVerticle extends AbstractVerticle {
             }).subscribe(consumer -> {
                 // complete the verticle start with a success
                 future.complete();
+                ready = true;
             }, future::fail);
         });
 
@@ -132,6 +134,14 @@ public class AuditVerticle extends AbstractVerticle {
 
         Router router = Router.router(vertx);
         router.get("/").handler(this::retrieveOperations);
+        router.get("/health").handler(rc -> {
+            if (ready) {
+                rc.response().end("Ready");
+            } else {
+                // Service not yet available
+                rc.response().setStatusCode(503).end();
+            }
+        });
         return vertx.createHttpServer().requestHandler(router::accept).rxListen(8080);
         //----
 

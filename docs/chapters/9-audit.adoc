@@ -91,6 +91,7 @@ Open the `io.vertx.workshop.audit.impl.AuditVerticle` class. The first important
     }).subscribe(consumer -> {
       // complete the verticle start with a success
       future.complete();
+      ready = true;
     }, error -> {
       // signal a verticle start failure
       future.fail(error);
@@ -267,6 +268,43 @@ return connectionRetrieved
 ----
 
 And voilà!
+
+=== Task - Expose readiness
+
+The audit service needs to orchestrate a set of task before being _ready to serve_. We should indicate this readiness
+ state to Kubernetes so it can know when we are ready. This would let it implement a rolling update strategy without
+ downtime as the previous version of the service will still be used until the new one is ready.
+
+You may have notice that our class has a `ready` field set to _true_ when we have completed our startup. In addition,
+ our `pom.xml` has the `<vertx.health.path>/health</vertx.health.path>` property indicating a health check. It
+ instructs Kubernetes to _ping_ this endpoint to know when the application is ready. But, there is still one thing
+ required: serving these request. Jump back to the `configureTheHTTPServer` method and add a _route_ handling `GET
+ /health` and returning a 200 response when the `ready` field is _true_, or a 503 response otherwise. Set the status
+ code with: `rc.response().setStatusCode(200).end("Ready")` (and don't forget to call `end`).
+
+ 
+[.assignment]
+****
+[source, java]
+----
+private Single<HttpServer> configureTheHTTPServer() {
+    Router router = Router.router(vertx);
+    router.get("/").handler(this::retrieveOperations);
+    router.get("/health").handler(rc -> {
+        if (ready) {
+            rc.response().end("Ready");
+        } else {
+            // Service not yet available
+            rc.response().setStatusCode(503).end();
+        }
+    });
+    return vertx.createHttpServer().requestHandler(router::accept).rxListen(8080);
+}
+----
+****
+
+With this in place, during the deployment, you will see that the pod state stays a "long" time in the _not ready_
+state (light blue). When the readiness check succeed, Kubernetes starts routing request to this pod.
 
 === Task - Async JDBC with a callback-based composition
 

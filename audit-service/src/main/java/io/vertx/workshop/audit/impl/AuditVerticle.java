@@ -34,6 +34,8 @@ public class AuditVerticle extends AbstractVerticle {
 
     private JDBCClient jdbc;
 
+    private boolean ready = false;
+
     /**
      * Starts the verticle asynchronously. The the initialization is completed, it calls
      * `complete()` on the given {@link Future} object. If something wrong happens,
@@ -68,6 +70,8 @@ public class AuditVerticle extends AbstractVerticle {
             }).subscribe(consumer -> {
                 // complete the verticle start with a success
                 future.complete();
+                // indicate our readiness state
+                ready = true;
             }, future::fail);
         });
 

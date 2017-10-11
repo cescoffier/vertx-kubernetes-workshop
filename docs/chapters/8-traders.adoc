@@ -167,4 +167,19 @@ Wan't to run the completed code, append the `-Psolution` to the Maven command.
 If you go back to the dashboard, you may start seen some moves on your portfolio. Now 2 traders are trying to make
 you (virtually) rich.
 
+=== Kubernetes Replicas - We are hiring!
+
+But was that's not enough traders.... we need more.
+
+In your terminal, issue:
+
+[source,bash]
+----
+oc scale dc compulsive-traders --replicas=2
+----
+
+And now.... we doubled the number of traders!
+
+This command instructs the deployment config to create 2 pods instead of 1. As the current state is 1, it creates
+another one.
 
