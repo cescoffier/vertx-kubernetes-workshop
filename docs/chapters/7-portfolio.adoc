@@ -246,7 +246,7 @@ retrieve the HTTP endpoint (service) provided by the quote generator. This servi
  in in the previous section. So, let's start by getting this service.
 
 Fill in the `evaluate` method to retrieve the `quotes` service. You can retrieve Http services using `HttpEndpoint
-.rxGetWebClient`. Pass a lambda as selecting the "quotes" service (`svc -> svc.getName().equals("quotes"). The
+.rxGetWebClient`. Pass a lambda as selecting the "quote-generator" service (`svc -> svc.getName().equals("quote-generator"). The
 `rxGetWebClient` method returns a `Single` (a stream of one item). As it's a stream we **must** subscribe on it (or
 nothing will happen). In the `subscribe((client, error) -> { ...})`, check whether the `error` is not `null`. If not,
  call the `resultHandler` with a failed future (`Future.failedFuture`). Otherwise call the `computeEvaluation` method. 
@@ -257,7 +257,7 @@ nothing will happen). In the `subscribe((client, error) -> { ...})`, check wheth
 ----
 Single<WebClient> quotes = HttpEndpoint                 // <1>
     .rxGetWebClient(discovery,
-    rec -> rec.getName().equals("quotes")
+    rec -> rec.getName().equals("quote-generator")
 );
 quotes.subscribe((client, err) -> {
   if (err != null) {                                    // <2>
@@ -313,7 +313,7 @@ NOTE: The `encode(String)` method is provided for you.
 ----
 private Single<Double> getValueForCompany(WebClient client, String company, int numberOfShares) {
     //----
-    return client.get("/name?" + encode(company))   // <1>
+    return client.get("/?name=" + encode(company))  // <1>
         .as(BodyCodec.jsonObject())                 // <2>
         .rxSend()                                   // <3>
         .map(HttpResponse::body)                    // <4>

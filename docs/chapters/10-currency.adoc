@@ -1,0 +1,138 @@
+== Resilience, Circuit Breaker and API Proxy - the currency service
+
+In this chapter we are going to see a very common microservice pattern: proxies. Sometimes you are relying on an
+_external_ service that is not _as good as you would like_. These flaky services can kill your system, as generally
+the error they produce cascade into the rest of your system. It's even worse with timeout as your are waiting for a
+response for a long time.
+
+In this chapter we are going to create a proxy in front of a 3rd party currency service (flaky) and improve the
+resilience of the system by protecting calls to this service with a _circuit breaker_.
+
+We are going to cover:
+* how to build a proxy
+* how to use a circuit breaker (and what it is)
+
+=== Proxies
+
+A _proxy_ is just a microservices delegating calls to another one. It may "improve" or "decorate" it, or even
+orchestrate different services. In that later case, we are closer to API gateways than plain proxies.
+
+[plantuml, proxy-sequence, png]
+----
+@startuml
+autonumber
+actor User
+participant Proxy
+participant Service
+
+User ->> Proxy : The user emits a request to the proxy
+Proxy ->> Service : The proxy delegates the actual service
+Service -->> Proxy : The service respond to the proxy
+Proxy -->> User : The proxy forward the response to the user
+
+@enduml
+----
+
+But why doing a proxy? Well, let's take the example of a flaky service:
+
+[plantuml, proxy-sequence-timeout, png]
+----
+@startuml
+autonumber
+actor User
+participant Proxy
+participant Service
+
+User ->> Proxy : The user emits a request to the proxy
+Proxy ->> Service : The proxy delegates the actual service
+Service -->x Proxy : The service rejects the request, or does not reply
+
+@enduml
+----
+
+In this case, the user does not get the valid answer, may wait a long time to get an answer and so on. So, the proxy
+must contain some "resilience" logic to isolate errors and if possible provide a fallback answer.
+
+=== Circuit Breakers
+
+A circuit breaker is an object monitoring an interaction, for instance the calls between our proxy and the flaky service. It starts in the _closed_ state. In this state, the circuit breaker forward the calls to the service and monitor the outcome (successes or failures). When the circuit breaker reaches an amount of failure, it switches to the _open_ state. In this state, the service is not called anymore, but a fallback response is used. After some specific time, the circuit breaker goes to the _half-open_ state and let the next request pass and hit the service. Depending on the result of this request, the circuit breaker goes back to the open state (on failure) or the closed state (on success).
+
+[plantuml, circuit-breaker-states, png]
+----
+@startuml
+[*] --> Closed
+Closed : In the closed state, requests\n are forward to the service.
+Open: The service is not called anymore,\n a fallback response is used
+state "Half-Open" as HO
+HO: The circuit breaker lets a\n request pass to check\n whether the service is back on track
+
+Closed -> Open : When the service has failed\n a couple of time
+
+Open -> HO : After some specific time,\n the circuit breaker\n switch to the half-open state
+
+
+HO -> Closed : If the request\n has been successful
+HO -> Open : If the request\n has failed
+
+@enduml
+----
+
+A circuit breaker is a great way to protect your system against flaky service and also gives them time to recover when they start failing (_open_ state). When the service is back on track, and thanks to the half-open state, your system is going to auto-recover and restart using the service.
+
+
+=== Task - Using the vert.x circuit breaker
+
+Open the `io.vertx.workshop.currency.CurrencyServiceProxy` class located in the `currency-service` project. Jump to the `delegateWithCircuitBreaker` method and fill it using the inlined instructions.
+
+[.assignment]
+****
+[source, java]
+----
+private void delegateWithCircuitBreaker(RoutingContext rc) {
+    HttpEndpoint.rxGetWebClient(discovery, svc -> svc.getName().equals("currency-3rdparty-service"))
+        .flatMap(client ->
+
+            // TODO
+            // Use the circuit breaker (circuit) to call the service. Use the rxExecuteCommandWithFallback` method.
+            // This methods takes 2 parameters: the first one if a function taking a `Future` as parameter and
+            // needs to report the success or failure on this future. The second method is a function providing
+            // the fallback result. You must provide a JSON object as response. For the fallback use:
+            // new JsonObject()
+            //      .put("amount", rc.getBodyAsJson().getDouble("amount"))
+            //      .put("currency", "USD"))
+            // In the first function, use the given client, emit a POST request on / containing the incoming
+            // payload (rc.getBodyAsJson()). Extract the response payload as JSON (bodyAsJsonObject). Don't
+            // forget to subscribe (you can use subscribe(toObserver(fut)). You can have a look to the `delegate`
+            // method as example.
+            // -----
+            circuit.rxExecuteCommandWithFallback(
+                fut ->
+                    client.post("/").rxSendJsonObject(rc.getBodyAsJson())
+                        .map(HttpResponse::bodyAsJsonObject)
+                        .subscribe(toObserver(fut)),
+                err -> new JsonObject()
+                    .put("amount", rc.getBodyAsJson().getDouble("amount"))
+                    .put("currency", "USD")))
+
+        // ----
+        .map(JsonObject::toBuffer)
+        .map(Buffer::new)
+        .subscribe(toObserver(rc));
+    }
+----
+****
+
+=== Show time !
+
+Let's see how this works.
+
+[source]
+----
+cd currency-service
+mvn fabric8:deploy
+----
+
+Now, in your OpenShift dashboard, click on the new route that has been created (such as `http://currency-service-proxy-vertx-kubernetes-workshop.192.168.64.17.nip.io`). Click on it and you should see the
+evaluation of your portfolio in Euros.
+
+

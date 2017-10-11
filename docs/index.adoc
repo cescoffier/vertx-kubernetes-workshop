@@ -1,6 +1,6 @@
-# Vert.x & Kubernetes - From zero to (micro)-hero
-Clement Escoffier
-v0.1, September, 6th, 2017
+= Vert.x & Kubernetes - From zero to (micro)-hero
+Clement Escoffier, Rodney Russ, Deven Phillips,
+v0.2, October, 11th, 2017
 :toc: left
 :toclevels: 4
 :imagesdir: images
@@ -8,15 +8,16 @@ v0.1, September, 6th, 2017
 :icons: font
 
 include::chapters/1-preface.adoc[Preface]
-include::chapters/11-prerequisites.adoc[Prerequisites]
+include::chapters/1_1-prerequisites.adoc[Prerequisites]
 include::chapters/2-vertx.adoc[Vert.x]
 include::chapters/3-microservices.adoc[Demystifying microservices]
 include::chapters/4-kubernetes.adoc[First step with Kubernetes]
 include::chapters/5-application.adoc[The application]
 include::chapters/6-quote-generator.adoc[Your first Vert.x microservice - the quote generator]
-include::chapters/7-portfolio.adoc[Exposing Event bus services, and HTTP client  - the portfolio service]
-include::chapters/8-traders.adoc[Async Programming Styles and Polyglot verticle - the trader service]
-include::chapters/9-audit.adoc[Database and complex composition - the audit service]
+include::chapters/7-portfolio.adoc[Exposing Event bus services, and Web client  - the portfolio service]
+include::chapters/8-traders.adoc[Async Programming Styles, Polyglot verticle and Replicas - the trader service]
+include::chapters/9-audit.adoc[Database, Secrets and Health checks - the audit service]
+include::chapters/10-currency.adoc[Resilience, Circuit Breaker and API Proxy - the currency service]
 include::chapters/conclusion.adoc[You made it!]
 include::chapters/references.adoc[References]
 include::chapters/appendix-A-commands.adoc[Appendix A - Start, Stop and List commands]
