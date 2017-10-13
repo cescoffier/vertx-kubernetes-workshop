@@ -1,5 +1,5 @@
 = Vert.x & Kubernetes - From zero to (micro)-hero
-Clement Escoffier, Rodney Russ, Deven Phillips,
+Clement Escoffier, Rodney Russ, Deven Phillips
 v0.2, October, 11th, 2017
 :toc: left
 :toclevels: 4
@@ -20,5 +20,4 @@ include::chapters/9-audit.adoc[Database, Secrets and Health checks - the audit s
 include::chapters/10-currency.adoc[Resilience, Circuit Breaker and API Proxy - the currency service]
 include::chapters/conclusion.adoc[You made it!]
 include::chapters/references.adoc[References]
-include::chapters/appendix-A-commands.adoc[Appendix A - Start, Stop and List commands]
 

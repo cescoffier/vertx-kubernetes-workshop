@@ -387,6 +387,18 @@ You should see:
 It gives the current details of each quotes. The data is updated every 3 seconds, so refresh your browser to get
 the latest data.
 
+=== Task - Deploying the dashboard
+
+We also need to deploy the dashboard. From the `micro-trader-dashboard` directory, execute:
+
+[source, bash]
+----
+mvn fabric8:deploy
+----
+
+In the OpenShift web console, wait until the pod is ready and click on the associated route. Append "/admin" and you
+should see the dashboard. If you go into the _trader_ tab, the graph should display the evolution of the market.
+
 === You are not a financial expert ?
 
 So maybe you are not used to the financial world and words... Neither am I, and this is a overly simplified version.
