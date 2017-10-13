@@ -45,9 +45,40 @@ We are going to implement critical parts of this application. However, the rest 
 ----
 
 
-Just to give a brief overview of the next chapters:
+Just to give a brief overview of the next chapters.
 
-* The quote generator focuses on the basics (project structure, RX2, event bus, HTTP)
-* The portfolio service implements an asynchronous RPC service (async interface, HTTP web client, async coordination)
-* TODO Add other chapters
+
+**Quote Generator chapter**
+
+* how projects are structured, built, and deployed
+* how to use the event bus to receive messages
+* how to implement HTTP actions
+* how to use RX Java 2 to avoid callbacks
+* using config maps to configure the application
+
+**Portfolio Service chapter**
+
+* how we can use the event bus to implement asynchronous RPC (RPC done right)
+* how to implement a _service proxy_ using callbacks
+* how to publish messages on the event bus
+* how to use the Vert.x Web Client
+
+**Impulsive Trader chapter**
+
+* how to consumer an event bus service
+* how to write a verticle using the plain Vert.x API (callbacks)
+* how to write a verticle using RX Java 2
+
+**Audit Service chapter**
+
+* how to manage advanced asynchronous orchestration
+* how to interact with a database
+* how to build a REST APU
+* how to manage _secrets_ with OpenShift
+
+**Currency Service chapter**
+
+* how to build a proxy
+* how to use a circuit breaker (and what it is)
+
 
