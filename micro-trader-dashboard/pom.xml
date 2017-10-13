@@ -51,7 +51,7 @@
       <groupId>com.github.cescoffier</groupId>
       <artifactId>vertx-kubernetes-workshop-trader-page</artifactId>
       <!--<version>0.0.1-SNAPSHOT</version>-->
-      <version>720cdfe47f</version>
+      <version>87996d087eacb3</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>

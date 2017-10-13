@@ -113,14 +113,18 @@ public class AuditVerticle extends AbstractVerticle {
                 context.fail(ar.cause());
             } else {
                 connection.query(SELECT_STATEMENT, result -> {
-                    ResultSet set = result.result();
-                    List<JsonObject> operations = set.getRows().stream()
-                        .map(json -> new JsonObject(json.getString("operation")))
-                        .collect(Collectors.toList());
-                    // 5. write this list into the response
-                    context.response().setStatusCode(200).end(Json.encodePrettily(operations));
-                    // 6. close the connection
-                    connection.close();
+                    if (result.failed()) {
+                        context.fail(result.cause());
+                    } else {
+                        ResultSet set = result.result();
+                        List<JsonObject> operations = set.getRows().stream()
+                            .map(json -> new JsonObject(json.getString("operation")))
+                            .collect(Collectors.toList());
+                        // 5. write this list into the response
+                        context.response().setStatusCode(200).end(Json.encodePrettily(operations));
+                        // 6. close the connection
+                        connection.close();
+                    }
                 });
             }
         });

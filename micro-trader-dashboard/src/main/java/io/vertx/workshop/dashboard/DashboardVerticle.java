@@ -8,12 +8,13 @@ import in.yunyul.vertx.console.metrics.MetricsConsolePage;
 import in.yunyul.vertx.console.services.ServicesConsolePage;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.ext.web.handler.sockjs.BridgeOptions;
 import io.vertx.ext.web.handler.sockjs.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
@@ -75,9 +76,9 @@ public class DashboardVerticle extends AbstractVerticle {
 
 
     private Future<WebClient> retrieveAuditService() {
-        return Future.future(future -> {
-            HttpEndpoint.getWebClient(discovery, new JsonObject().put("name", "audit"), future);
-        });
+        Future<WebClient> future = Future.future();
+        HttpEndpoint.getWebClient(discovery, new JsonObject().put("name", "audit-service"), future);
+        return future;
     }
 
 
@@ -90,15 +91,35 @@ public class DashboardVerticle extends AbstractVerticle {
                         .setStatusCode(200)
                         .end(new JsonObject().put("message", "No audit service").encode());
                 } else {
-                    ar.result().get("/").send(res -> {
-                        if (res.succeeded()) {
-                            HttpResponse<Buffer> response = res.result();
-                            context.response()
-                                .putHeader("content-type", "application/json")
-                                .setStatusCode(200)
-                                .end(response.body());
-                        }
-                    });
+                    ar.result().get("/")
+                        .as(BodyCodec.jsonArray())
+                        .timeout(5000)
+                        .send(res -> {
+                            if (res.succeeded()) {
+                                HttpResponse<JsonArray> response = res.result();
+                                JsonArray operations = new JsonArray();
+                                for (Object entry : response.body()) {
+                                    JsonObject json = (JsonObject) entry;
+                                    operations.add(
+                                        new JsonObject()
+                                            .put("type", json.getString("action"))
+                                            .put("company", json.getJsonObject("quote").getString("name"))
+                                            .put("amount", json.getInteger("amount"))
+                                    );
+                                }
+                                context.response()
+                                    .putHeader("content-type", "application/json")
+                                    .setStatusCode(200)
+                                    .end(operations.toBuffer());
+                            } else {
+                                ar.cause().printStackTrace();
+                                context.response()
+                                    .putHeader("content-type", "application/json")
+                                    .setStatusCode(200)
+                                    .end(new JsonObject()
+                                        .put("message", "No audit service (" + ar.cause().getMessage() + ")").encode());
+                            }
+                        });
                 }
             });
     }
