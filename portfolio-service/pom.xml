@@ -28,17 +28,27 @@
       <artifactId>vertx-infinispan</artifactId>
       <exclusions>
         <exclusion>
+          <groupId>org.infinispan</groupId>
+          <artifactId>infinispan-core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.infinispan</groupId>
+      <artifactId>infinispan-cloud</artifactId>
+      <version>9.1.1.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jgroups.kubernetes</groupId>
+      <artifactId>jgroups-kubernetes</artifactId>
+      <version>1.0.3.Final</version>
+      <exclusions>
+        <exclusion>
           <artifactId>jgroups</artifactId>
           <groupId>org.jgroups</groupId>
         </exclusion>
       </exclusions>
     </dependency>
-    <dependency>
-      <groupId>org.jgroups.kubernetes</groupId>
-      <artifactId>jgroups-kubernetes</artifactId>
-      <version>1.0.1.Final</version>
-    </dependency>
-
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-service-proxy</artifactId>

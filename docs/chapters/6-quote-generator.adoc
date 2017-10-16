@@ -33,8 +33,6 @@ Let's have a look at the project, as every other project are structured the same
 |   |   |                   |-- GeneratorConfigVerticle.java
 |   |   |                   |-- MarketDataVerticle.java
 |   |   |                   `-- RestQuoteAPIVerticle.java
-|   |   |-- resources  <----- The resources used at runtime
-|   |   |   `-- jgroups-kubernetes.xml  <----- The cluster configuration
 |   |   `-- solution
 |   |       `-- io/vertx/workshop/quote  <----- The complete code (including the answers to the assignments)
 |   |                          |-- GeneratorConfigVerticle.java
@@ -64,7 +62,6 @@ Let's have a look at the project, as every other project are structured the same
     |    |                    └── RestQuoteAPIVerticle.java
     |    └── resources
     |         └── config.json <--- the test configuration
-    |         └── jgroups-kubernetes.xml <--- the cluster configuration
 ----
 
 Let's start with the `pom.xml` file. This file specifies the Maven build:
