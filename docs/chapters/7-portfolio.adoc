@@ -85,7 +85,7 @@ Using async-RPC has several advantages:
 To create an async RPC service, or event bus service, or service proxies, you first need a Java interface declaring the
  async methods. Open the `io.vertx.workshop.portfolio.PortfolioService` class. You will quickly notice that this
  interface does not use RX Java, but `Handlers`. This is because the class is used to generate the RX Java,
- as well as Kotlin and Scala versions.   
+ as well as Kotlin versions.
 
 The interface is annotated with:
 

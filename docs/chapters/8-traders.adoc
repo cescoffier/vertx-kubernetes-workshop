@@ -5,11 +5,10 @@ sending market data to the event bus. In the portfolio service, we expose an eve
 portfolio. Traders are the missing link between both. It implement the logic deciding when to buy and sell stocks.
 Traders have only one goal: getting rich (or not...)!
 
-In this section, we are going to develop 3 traders (following a stupid logic you can definitely improve):
+In this section, we are going to develop 2 traders (following a stupid logic you can definitely improve):
 
 * The first trader is developed with the _raw_ Vert.x API (callbacks)
 * The second trader is developer with RX Java 2 (reactive programming)
-* The third trader is developed with Kotlin using co-routine
 
 It gives you an overview of the different programming style proposed by Vert.x, and let you decide which one you
 prefer. Also notice that Vert.x supports JavaScript, Groovy, Ruby, Scala and Ceylon.
