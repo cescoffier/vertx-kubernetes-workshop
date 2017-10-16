@@ -61,8 +61,6 @@ If you don't have an IDE, here are the steps to get started with Eclipse.
 git clone https://github.com/cescoffier/vertx-kubernetes-workshop
 ----
 
-// TODO To check once done
-
 You can import the code in your IDE as a Maven project. You can refer to your IDE documentation to know how to import Maven projects.
 
 For Eclipse:
@@ -75,17 +73,4 @@ You are going to see a couple of compilation errors. This is because Eclipse doe
 directories as _source root_ by default. Right-click on `portfolio-service/src/main/generated` and select _Build Path
 -> Use as Source Folder_.
 
-TIP: A complete solution is given in the `solution` directory.
-
-=== Build
-
-The build is managed using Apache Maven. Compile everything using:
-
-[source]
-----
-cd vertx-kubernetes-workshop
-mvn clean install
-----
-
-As said previously, Vert.x does not depend on Apache Maven. You can use any build tool (or even no build tool at all).
 

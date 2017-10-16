@@ -11,12 +11,8 @@ public class MainVerticle extends AbstractVerticle {
 
   @Override
   public void start() throws Exception {
-    
-//    vertx.deployVerticle(CallbackTraderVerticle.class.getName());
+    vertx.deployVerticle(CallbackTraderVerticle.class.getName());
     vertx.deployVerticle(RXCompulsiveTraderVerticle.class.getName());
-
-    // TODO Kotlin
-//    vertx.deployVerticle("GroovyCompulsiveTraderVerticle.groovy");
 
   }
 }

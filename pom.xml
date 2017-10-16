@@ -224,27 +224,6 @@
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.0.0</version>
         </plugin>
-
-        <plugin>
-          <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.0.1</version>
-          <executions>
-            <!-- TODO how to provision the infinispan config -->
-            <execution>
-              <id>unpack-hazelcast-configuration</id>
-              <phase>process-resources</phase>
-              <goals>
-                <goal>unpack-dependencies</goal>
-              </goals>
-              <configuration>
-                <includeArtifactIds>vertx-workshop-common</includeArtifactIds>
-                <outputDirectory>${project.build.directory}/classes</outputDirectory>
-                <includes>**/cluster.xml</includes>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping</artifactId>
