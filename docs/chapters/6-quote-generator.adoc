@@ -45,23 +45,6 @@ Let's have a look at the project, as every other project are structured the same
 |       |                         `-- MarketDataVerticleTest.java
 |       `-- resources  <----- resources used for tests
 `-- target  <----- output directory
-
-
-.
-├── README.md <--- project description with the build and run instructions
-├── pom.xml <--- the Maven file
-└── src
-    |
-    ├── fabric8 <--- contains the Kubernetes / Openshift customization
-    ├── solution <--- contains the complete code (build with -Psolution)
-    ├── main
-    |    ├── java
-    |    |    └── io.vertx.workshop.quote
-    |    |                    ├── GeneratorConfigVerticle.java <--- the verticles
-    |    |                    ├── MarketDataVerticle.java
-    |    |                    └── RestQuoteAPIVerticle.java
-    |    └── resources
-    |         └── config.json <--- the test configuration
 ----
 
 Let's start with the `pom.xml` file. This file specifies the Maven build:
