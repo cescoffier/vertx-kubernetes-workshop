@@ -11,7 +11,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <vertx.version>3.5.0.Beta1</vertx.version>
+    <vertx.version>3.6.3</vertx.version>
     <source.dir>src/main/java</source.dir>
     <vertx.cluster.name>none</vertx.cluster.name>
     <workshop.solution>false</workshop.solution>
@@ -65,6 +65,11 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-rx-java2</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-rx-java2-gen</artifactId>
+      <version>${vertx.version}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
