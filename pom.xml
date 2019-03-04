@@ -39,6 +39,23 @@
         <workshop.solution>true</workshop.solution>
       </properties>
     </profile>
+    <profile>
+        <id>travis</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>fabric8-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>fmp</id>
+                            <phase>none</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
   </profiles>
 
   <dependencyManagement>
