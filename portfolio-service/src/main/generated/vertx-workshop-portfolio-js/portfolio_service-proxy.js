@@ -14,6 +14,8 @@
  * under the License.
  */
 
+/// <reference path="./portfolio_service-proxy.d.ts" />
+
 /** @module vertx-workshop-portfolio-js/portfolio_service */
 !function (factory) {
   if (typeof require === 'function' && typeof module !== 'undefined') {
@@ -28,15 +30,14 @@
 }(function () {
 
   /**
- A service managing a portfolio.
- <p>
- This service is an event bus service (a.k.a service proxies, or async RPC). The client and server are generated at
- compile time.
- <p>
- @class
+   A service managing a portfolio.
+   <p>
+   This service is an event bus service (a.k.a service proxies, or async RPC). The client and server are generated at
+   compile time.
+   <p>
+   @class
   */
   var PortfolioService = function(eb, address) {
-
     var j_eb = eb;
     var j_address = address;
     var closed = false;
@@ -55,13 +56,13 @@
      @public
      @param resultHandler {function} the result handler called when the portfolio has been retrieved. The async result indicates whether the call was successful or not. 
      */
-    this.getPortfolio = function(resultHandler) {
+    this.getPortfolio =  function(resultHandler) {
       var __args = arguments;
       if (__args.length === 1 && typeof __args[0] === 'function') {
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"getPortfolio"}, function(err, result) { __args[0](err, result &&result.body); });
+        j_eb.send(j_address, {}, {"action":"getPortfolio"}, function(err, result) { __args[0](err, result && result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -74,13 +75,13 @@
      @param quote {Object} the last quote 
      @param resultHandler {function} the result handler with the updated portfolio. If the action cannot be executed, the async result is market as a failure (not enough money, not enough shares available...) 
      */
-    this.buy = function(amount, quote, resultHandler) {
+    this.buy =  function(amount, quote, resultHandler) {
       var __args = arguments;
       if (__args.length === 3 && typeof __args[0] ==='number' && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {"amount":__args[0], "quote":__args[1]}, {"action":"buy"}, function(err, result) { __args[2](err, result &&result.body); });
+        j_eb.send(j_address, {"amount":__args[0], "quote":__args[1]}, {"action":"buy"}, function(err, result) { __args[2](err, result && result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -93,13 +94,13 @@
      @param quote {Object} the last quote 
      @param resultHandler {function} the result handler with the updated portfolio. If the action cannot be executed, the async result is market as a failure (not enough share...) 
      */
-    this.sell = function(amount, quote, resultHandler) {
+    this.sell =  function(amount, quote, resultHandler) {
       var __args = arguments;
       if (__args.length === 3 && typeof __args[0] ==='number' && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {"amount":__args[0], "quote":__args[1]}, {"action":"sell"}, function(err, result) { __args[2](err, result &&result.body); });
+        j_eb.send(j_address, {"amount":__args[0], "quote":__args[1]}, {"action":"sell"}, function(err, result) { __args[2](err, result && result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -110,13 +111,13 @@
      @public
      @param resultHandler {function} the result handler with the valuation 
      */
-    this.evaluate = function(resultHandler) {
+    this.evaluate =  function(resultHandler) {
       var __args = arguments;
       if (__args.length === 1 && typeof __args[0] === 'function') {
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"evaluate"}, function(err, result) { __args[0](err, result &&result.body); });
+        j_eb.send(j_address, {}, {"action":"evaluate"}, function(err, result) { __args[0](err, result && result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
