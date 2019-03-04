@@ -7,6 +7,8 @@ Instructions are available on http://escoffier.me/vertx-kubernetes
 
 Complete code is available in the `solution` directory.
 
+[![Build Status](https://travis-ci.org/cescoffier/vertx-kubernetes-workshop.svg?branch=master)](https://travis-ci.org/cescoffier/vertx-kubernetes-workshop)
+
 ## Teasing
 
 When coming to microservices, event-driven, asynchronous and reactive are quickly mentioned to implement them right. It avoids building _distributed_ monolith. In addition, in order to keep everything on track, you need a way to package and manage them. OpenShift is a container platform, based on Kubernetes, able to build, deploy, manage and update your microservices.  
