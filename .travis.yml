@@ -4,6 +4,6 @@ jdk:
 
 install: true
 
-install:
+script:
   - mvn clean test -Ptravis
   - mvn clean test -Ptravis,solution
