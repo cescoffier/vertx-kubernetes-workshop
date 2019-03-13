@@ -133,7 +133,7 @@ payload.
 discovery.rxGetRecord(svc -> svc.getName().equals("greetings"))
     .map(rec -> discovery.getReference(rec))
     .map(ref -> ref.getAs(WebClient.class))
-    .flatMap(client -> client.get("/greetings/vert.x-low-level-api").rxSend())
+    .flatMapSingle(client -> client.get("/greetings/vert.x-low-level-api").rxSend())
     .map(HttpResponse::bodyAsString)
     .subscribe(res -> System.out.println("Result from the greeting service " + res));
 ----
