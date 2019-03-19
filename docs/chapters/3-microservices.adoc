@@ -127,13 +127,13 @@ payload.
 // parameter to retrieve the service with the name "greetings"
 // 2 - With the record (`.map`), get the service reference using `discovery.getReference`
 // 3 - With the reference (`.map`), get a WebClient (Vert.x http client) using `ref.getAs(WebClient.class)`
-// 4 - With the client (`.flatMap`), invoke the service using: `client.get("/greetings/vert.x-low-level-api").rxSend()`
+// 4 - With the client (`.flatMapSingle`), invoke the service using: `client.get("/greetings/vert.x-low-level-api").rxSend()`
 // 5 - With the response (`.map`), extract the body as string (`bodyAsString` method)
 // 6 - Finally subscribe and print the result on the console
 discovery.rxGetRecord(svc -> svc.getName().equals("greetings"))
     .map(rec -> discovery.getReference(rec))
     .map(ref -> ref.getAs(WebClient.class))
-    .flatMap(client -> client.get("/greetings/vert.x-low-level-api").rxSend())
+    .flatMapSingle(client -> client.get("/greetings/vert.x-low-level-api").rxSend())
     .map(HttpResponse::bodyAsString)
     .subscribe(res -> System.out.println("Result from the greeting service " + res));
 ----
